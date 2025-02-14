@@ -1,0 +1,183 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  GENERAL
+  ADMIN
+  USER
+}
+
+enum Type_User {
+  ALUNO
+  SERVIDOR
+  EXTERNO
+}
+
+
+enum Status {
+  CONCLUIDO
+  PENDENTE
+}
+
+enum Type_Reserve {
+  OFICIO
+  EVENTO 
+  AULA
+}
+
+enum Type_Practice {
+  TREINO
+  RECREACAO
+  AMISTOSO
+}
+
+enum Ocurrence {
+  EVENTO_UNICO
+  SEMANALMENTE
+}
+
+// Tabela usuário
+model User {
+  id String @id @default(uuid())
+  name String
+  email String
+  password String
+  type_User Type_User @default(ALUNO)
+  role Role @default(USER)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  // Relacionamentos
+  userInternal User_Internal?
+  userExternal User_External?
+  restore Restore[]
+  reserve Reserve[]
+}
+
+// Tabela usuário interno 
+model User_Internal {
+  id String @id @default(uuid())
+  registration String @unique
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  // Atributos de Relacionamento (especialização)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId String @unique @map("userId")
+}
+
+// Tabela usuário externo
+model User_External {
+  id String @id @default(uuid())
+  cpf String @unique
+  phone String?
+  address String?
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  // Atributos de Relacionamento (especialização)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId String @unique
+}
+
+// Tabela restauração de senha
+model Restore {
+  id String @id @default(uuid())
+  token String
+  status Status @default(PENDENTE)
+  expiration DateTime
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId String @unique
+}
+
+// Tabela de reserva 
+model Reserve {
+  id String @id @default(uuid())
+  Type_Reserve Type_Reserve @default(OFICIO)
+  ocurrence Ocurrence @default(EVENTO_UNICO)
+  date_Start DateTime
+  date_End DateTime
+  hour_Start DateTime
+  hour_End DateTime
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId String @unique
+
+  sport Sport?
+  classroom Classroom?
+  event Event?
+  report Report?
+}
+
+// Tabela de reserva da quadra para ofício
+model Sport {
+  id String @id @default(uuid())
+  type_Practice Type_Practice @default(RECREACAO)
+  number_People Int 
+  description_People String 
+  request_Equipment String
+  confirmed Boolean @default(false)
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  reserve Reserve @relation(fields: [reserveId], references: [id], onDelete: Cascade)
+  reserveId String @unique
+}
+
+// Tabela de reserva da quadra para aulas de Ed. Física
+model Classroom {
+  id String @id @default(uuid())
+  course String
+  matter String
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  reserve Reserve @relation(fields: [reserveId], references: [id], onDelete: Cascade)
+  reserveId String @unique
+}
+
+// Tabela de reserva da quadra para eventos ou eventos fora da quadra
+model Event {
+  id String @id @default(uuid())
+  name String
+  description String
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  reserve Reserve @relation(fields: [reserveId], references: [id], onDelete: Cascade)
+  reserveId String @unique
+}
+
+model Report {
+  id String @id @default(uuid())
+  name_User String 
+  people_Appear String
+  requested_Equipment String
+  description_Court String
+  description_Equipment String
+  time_Used String
+  date_Used DateTime
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  reserve Reserve @relation(fields: [reserveId], references: [id], onDelete: Cascade)
+  reserveId String @unique
+}
