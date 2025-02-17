@@ -6,29 +6,17 @@ import {
 } from '@nestjs/common';
 import { CreateUserDto } from './dto/userDto';
 import { PrismaService } from 'src/database/PrismaService';
+import { Request } from 'express';
 
 @Injectable()
 export class UserService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async choosingUserType(body: CreateUserDto) {
+  async choosingUserType(body: CreateUserDto, req: Request) {
     try {
-      const usr = await this.prisma.user.create({
-        data: {
-          name: '',
-          email: '',
-          password: '',
-          role: 'USER',
-          type_User: body.type_User,
-        },
-        select: {
-          id: true,
-          role: true,
-          type_User: true,
-        },
-      });
-
-      return usr;
+      return {
+        message: 'Tipo de usuário encontrado',
+      };
     } catch (error) {
       return {
         message: 'Erro ao criar usuário',
