@@ -46,7 +46,7 @@ enum Ocurrence {
 model User {
   id String @id @default(uuid())
   name String
-  email String
+  email String @unique
   password String
   type_User Type_User @default(ALUNO)
   role Role @default(USER)
