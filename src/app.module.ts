@@ -11,6 +11,7 @@ import { UserInternalModule } from './modules/user-internal/user-internal.module
 import { PrismaService } from './database/PrismaService';
 import { UserTypeMiddleware } from './modules/user/middleware/type-user';
 import { UserController } from './modules/user/user.controller';
+import { UserExternalModule } from './modules/user-external/user-external.module';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { UserController } from './modules/user/user.controller';
     ScheduleModule.forRoot(),
     UserModule,
     UserInternalModule,
+    UserExternalModule,
     CaslModule,
     AuthModule,
   ],
