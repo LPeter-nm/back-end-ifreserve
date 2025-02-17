@@ -8,11 +8,9 @@ import { AuthGuard } from './modules/auth/auth.guard';
 import { CaslModule } from './modules/casl/casl.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { UserInternalModule } from './modules/user-internal/user-internal.module';
-import { UserService } from './modules/user/user.service';
 import { PrismaService } from './database/PrismaService';
 import { UserTypeMiddleware } from './modules/user/middleware/type-user';
 import { UserController } from './modules/user/user.controller';
-import { UserInternalController } from './modules/user-internal/user-internal.controller';
 
 @Module({
   imports: [
