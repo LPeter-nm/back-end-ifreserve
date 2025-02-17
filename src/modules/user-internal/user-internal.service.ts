@@ -56,17 +56,17 @@ export class UserInternalService {
         );
       const randomPass = randomInt(10, 16);
       const hashedPassword = await bcrypt.hash(body.password, randomPass);
-      const user = await this.prisma.user.create({
+      const registerUser = await this.prisma.user.create({
         data: {
           name: body.name,
           email: body.email,
           password: hashedPassword,
-          type_User: req.session?.userType,
+          type_User: typeUser,
         },
       });
-      const registerUser = await this.prisma.user_Internal.create({
+      const registerUserEsp = await this.prisma.user_Internal.create({
         data: {
-          userId: user.id,
+          userId: registerUser.id,
           registration: body.registration,
         },
         select: {
@@ -85,7 +85,7 @@ export class UserInternalService {
       });
       if (!isAluno && typeUser === 'SERVIDOR' && isServer) {
         await this.prisma.user.update({
-          where: { id: user.id },
+          where: { id: registerUser.id },
           data: {
             role: 'ADMIN',
           },
@@ -96,9 +96,7 @@ export class UserInternalService {
           status: HttpStatus.FORBIDDEN,
         };
       }
-      return {
-        usr: registerUser,
-      };
+      return registerUserEsp;
     } catch (error) {
       return {
         message: 'Erro ao registrar usuário interno',
@@ -107,7 +105,7 @@ export class UserInternalService {
     }
   }
 
-  async findAll(req: Request) {
+  async findAll() {
     try {
       const users = await this.prisma.user_Internal.findMany({
         select: {
@@ -136,7 +134,7 @@ export class UserInternalService {
     try {
       const usrInternal = await this.prisma.user_Internal.findFirst({
         where: {
-          id: req.user?.id,
+          userId: req.user?.id,
         },
         select: {
           id: true,
@@ -152,15 +150,6 @@ export class UserInternalService {
         },
       });
 
-      const usr = await this.prisma.user.findUnique({
-        where: { id: usrInternal?.userId },
-      });
-
-      if (usr?.id !== req.user?.id)
-        throw new ForbiddenException(
-          'Você só pode acessar seus dados | deixe de ser curioso',
-        );
-
       return usrInternal;
     } catch (error) {
       return {
@@ -171,16 +160,16 @@ export class UserInternalService {
   }
 
   async update(body: UpdateUserInternalDto, req: Request) {
+    const userId = req.user?.id;
+
     const usrCheck = await this.prisma.user_Internal.findUnique({
-      where: { id: req.user?.id },
+      where: { userId: userId },
     });
 
     if (!usrCheck)
-      throw new HttpException('Usuário não encontrado', HttpStatus.NOT_FOUND);
-
-    if (usrCheck?.id !== req.user?.id)
-      throw new ForbiddenException(
-        'Você só pode atualizar seus dados | deixe de ser hacker periculoso',
+      throw new HttpException(
+        'Usuário não encontrado no token fornecido',
+        HttpStatus.NOT_FOUND,
       );
 
     const randomPass = randomInt(10, 16);
@@ -193,16 +182,10 @@ export class UserInternalService {
       const usrUpdated = await this.prisma.user.update({
         where: { id: req.user?.id },
         data: {
-          ...body,
+          name: body.name,
           password: hashedPassword,
         },
       });
-
-      if (!usrUpdated)
-        throw new HttpException(
-          'Erro ao atualizar dados do usuário',
-          HttpStatus.BAD_REQUEST,
-        );
 
       return usrUpdated;
     } catch (error) {
@@ -214,20 +197,22 @@ export class UserInternalService {
   }
 
   async delete(req: Request) {
+    const userId = req.user?.id;
+
     const userCheck = await this.prisma.user_Internal.findUnique({
-      where: { id: req.user?.id },
+      where: { userId: userId },
     });
     if (!userCheck) {
-      throw new HttpException('Usuário não encontrado', HttpStatus.NOT_FOUND);
+      throw new HttpException(
+        'Usuário não encontrado no token fornecido',
+        HttpStatus.NOT_FOUND,
+      );
     }
 
-    if (userCheck?.id !== req.user?.id)
-      throw new ForbiddenException(
-        'Você só pode excluir seus dados | deixe de ser malandro',
-      );
-
     try {
-      await this.prisma.user_Internal.delete({ where: { id: req.user?.id } });
+      await this.prisma.user_Internal.delete({
+        where: { userId: userId },
+      });
 
       return {
         message: 'Usuário deletado com sucesso',

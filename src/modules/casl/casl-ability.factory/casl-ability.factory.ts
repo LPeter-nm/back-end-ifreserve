@@ -22,6 +22,7 @@ export class CaslAbilityFactory {
       case 'GENERAL':
         can(Action.General, 'all');
         can(Action.Admin, 'all');
+        can(Action.User, 'all');
         break;
       case 'ADMIN':
         can(Action.Admin, 'all');

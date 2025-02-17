@@ -1,5 +1,4 @@
-import { IsNotEmpty } from 'class-validator';
-import { Type_User } from 'src/modules/user/dto/userDto';
+import { IsNotEmpty, IsOptional } from 'class-validator';
 
 export class CreateUserInternalDto {
   @IsNotEmpty()
@@ -16,6 +15,7 @@ export class CreateUserInternalDto {
 }
 
 export class UpdateUserInternalDto {
+  @IsOptional()
   name?: string;
 
   password?: string;

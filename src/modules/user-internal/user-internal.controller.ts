@@ -3,7 +3,6 @@ import {
   Get,
   Post,
   Body,
-  Param,
   Delete,
   UseGuards,
   Req,
@@ -34,8 +33,8 @@ export class UserInternalController {
 
   @Get('users')
   @CheckPolicies((ability: AppAbility) => ability.can(Action.General, 'all'))
-  findAll(@Req() req: Request) {
-    return this.userInternalService.findAll(req);
+  findAll() {
+    return this.userInternalService.findAll();
   }
 
   @Get()

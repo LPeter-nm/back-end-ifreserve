@@ -17,7 +17,7 @@ import { CreateUserDto } from './dto/userDto';
 import { CheckPolicies } from '../casl/guards/policies.check';
 import { AppAbility } from '../casl/casl-ability.factory/casl-ability.factory';
 import { Action } from '../casl/casl-ability.factory/actionDTO/casl-actionDTO';
-import { NextFunction, Request, Response } from 'express';
+import { Request } from 'express';
 import { UserTypeMiddleware } from './middleware/type-user';
 
 @UseGuards(PoliciesGuard)
