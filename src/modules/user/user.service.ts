@@ -15,13 +15,10 @@ export class UserService {
   async choosingUserType(body: CreateUserDto, req: Request) {
     try {
       return {
-        message: 'Tipo de usuário encontrado',
+        message: `Tipo de usuário: ${req.session.userType}`,
       };
     } catch (error) {
-      return {
-        message: 'Erro ao criar usuário',
-        error: error,
-      };
+      throw new HttpException(error as string, HttpStatus.BAD_REQUEST);
     }
   }
 
@@ -38,10 +35,7 @@ export class UserService {
 
       return users;
     } catch (error) {
-      return {
-        message: 'Erro ao listar usuários',
-        error: error,
-      };
+      throw new HttpException(error as string, HttpStatus.BAD_REQUEST);
     }
   }
 
@@ -68,10 +62,7 @@ export class UserService {
         user: usrCheck,
       };
     } catch (error) {
-      return {
-        message: 'Erro ao listar dados do usuário',
-        error: error,
-      };
+      throw new HttpException(error as string, HttpStatus.BAD_REQUEST);
     }
   }
 
@@ -94,10 +85,7 @@ export class UserService {
         status: HttpStatus.OK,
       };
     } catch (error) {
-      return {
-        message: 'Erro ao deletar usuário',
-        status: HttpStatus.BAD_REQUEST,
-      };
+      throw new HttpException(error as string, HttpStatus.BAD_REQUEST);
     }
   }
 }

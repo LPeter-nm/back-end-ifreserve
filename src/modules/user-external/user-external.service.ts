@@ -81,10 +81,7 @@ export class UserExternalService {
 
       return registerUserEsp;
     } catch (error) {
-      return {
-        message: 'Erro ao criar usuário externo',
-        error: error,
-      };
+      throw new HttpException(error as string, HttpStatus.BAD_REQUEST);
     }
   }
 
@@ -108,10 +105,7 @@ export class UserExternalService {
 
       return users;
     } catch (error) {
-      return {
-        message: 'Erro ao listar usuários externos',
-        error: error,
-      };
+      throw new HttpException(error as string, HttpStatus.BAD_REQUEST);
     }
   }
 
@@ -139,10 +133,7 @@ export class UserExternalService {
 
       return usrExternal;
     } catch (error) {
-      return {
-        message: 'Erro ao listar dados do usuário externo',
-        error: error,
-      };
+      throw new HttpException(error as string, HttpStatus.BAD_REQUEST);
     }
   }
 
@@ -190,10 +181,7 @@ export class UserExternalService {
 
       return usrUpdated;
     } catch (error) {
-      return {
-        message: 'Erro ao atualizar usuário externo',
-        error: error,
-      };
+      throw new HttpException(error as string, HttpStatus.BAD_REQUEST);
     }
   }
 
@@ -215,10 +203,7 @@ export class UserExternalService {
         status: HttpStatus.NO_CONTENT,
       };
     } catch (error) {
-      return {
-        message: 'Erro ao deletar usuário externo',
-        error: error,
-      };
+      throw new HttpException(error as string, HttpStatus.BAD_REQUEST);
     }
   }
 }
