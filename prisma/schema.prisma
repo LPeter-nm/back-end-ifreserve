@@ -20,9 +20,16 @@ enum Type_User {
 }
 
 
-enum Status {
+enum StatusRestore {
   CONCLUIDO
   PENDENTE
+}
+
+enum StatusSport {
+  PENDENTE
+  CONFIRMADA
+  RECUSADA
+  CANCELADA
 }
 
 enum Type_Reserve {
@@ -56,8 +63,12 @@ model User {
   // Relacionamentos
   userInternal User_Internal?
   userExternal User_External?
-  restore Restore[]
-  reserve Reserve[]
+  notifications Notification[]
+  restores Restore[]
+  reserves Reserve[]
+
+  @@index([email])
+  @@index([createdAt])
 }
 
 // Tabela usuário interno 
@@ -92,13 +103,15 @@ model User_External {
 model Restore {
   id String @id @default(uuid())
   token String
-  status Status @default(PENDENTE)
+  status StatusRestore @default(PENDENTE)
   expiration DateTime
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId String @unique
+
+  @@index([token]) 
 }
 
 // Tabela de reserva 
@@ -121,6 +134,9 @@ model Reserve {
   classroom Classroom?
   event Event?
   report Report?
+
+  @@index([date_Start, date_End])
+  @@index([userId])
 }
 
 // Tabela de reserva da quadra para ofício
@@ -128,9 +144,10 @@ model Sport {
   id String @id @default(uuid())
   type_Practice Type_Practice @default(RECREACAO)
   number_People Int 
-  description_People String 
+  participants String 
   request_Equipment String
-  confirmed Boolean @default(false)
+  status StatusSport @default(PENDENTE)
+  confirmedBy String?
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
@@ -157,6 +174,7 @@ model Event {
   id String @id @default(uuid())
   name String
   description String
+  location String
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
@@ -174,10 +192,24 @@ model Report {
   description_Equipment String
   time_Used String
   date_Used DateTime
+  submittedBy String
+  description String?
+  comments String?
+  status Boolean @default(false)
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
   reserve Reserve @relation(fields: [reserveId], references: [id], onDelete: Cascade)
   reserveId String @unique
+}
+
+model Notification {
+  id String @id @default(uuid())
+  message String
+  read Boolean @default(false)
+  userId String
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
 }
