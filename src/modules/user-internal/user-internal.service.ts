@@ -54,6 +54,23 @@ export class UserInternalService {
           'O Email está incorreto',
           HttpStatus.BAD_REQUEST,
         );
+
+      console.log();
+      if (!isAluno || !isServer) {
+        throw new HttpException(
+          'A matrícula não corresponde a nenhum tipo de usuário',
+          HttpStatus.EXPECTATION_FAILED,
+        );
+      }
+      if (
+        (typeUser === 'SERVIDOR' && isAluno) ||
+        (typeUser === 'ALUNO' && isServer)
+      ) {
+        throw new HttpException(
+          'Matrícula não corresponde ao seu tipo de usuário',
+          HttpStatus.EXPECTATION_FAILED,
+        );
+      }
       const randomPass = randomInt(10, 16);
       const hashedPassword = await bcrypt.hash(body.password, randomPass);
       const registerUser = await this.prisma.user.create({
@@ -130,11 +147,11 @@ export class UserInternalService {
     }
   }
 
-  async findOne(req: Request) {
+  async findOne(id: string) {
     try {
       const usrInternal = await this.prisma.user_Internal.findFirst({
         where: {
-          userId: req.user?.id,
+          userId: id,
         },
         select: {
           id: true,
@@ -159,11 +176,11 @@ export class UserInternalService {
     }
   }
 
-  async update(body: UpdateUserInternalDto, req: Request) {
-    const userId = req.user?.id;
+  async update(body: UpdateUserInternalDto, id: string) {
+    const userId = id;
 
     const usrCheck = await this.prisma.user_Internal.findUnique({
-      where: { userId: userId },
+      where: { userId },
     });
 
     if (!usrCheck)
@@ -180,7 +197,7 @@ export class UserInternalService {
 
     try {
       const usrUpdated = await this.prisma.user.update({
-        where: { id: req.user?.id },
+        where: { id: userId },
         data: {
           name: body.name,
           password: hashedPassword,
@@ -196,11 +213,11 @@ export class UserInternalService {
     }
   }
 
-  async delete(req: Request) {
-    const userId = req.user?.id;
+  async delete(id: string) {
+    const userId = id;
 
     const userCheck = await this.prisma.user_Internal.findUnique({
-      where: { userId: userId },
+      where: { userId },
     });
     if (!userCheck) {
       throw new HttpException(
@@ -211,7 +228,7 @@ export class UserInternalService {
 
     try {
       await this.prisma.user_Internal.delete({
-        where: { userId: userId },
+        where: { userId },
       });
 
       return {

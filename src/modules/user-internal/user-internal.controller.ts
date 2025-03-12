@@ -7,6 +7,7 @@ import {
   UseGuards,
   Req,
   Put,
+  Param,
 } from '@nestjs/common';
 import { UserInternalService } from './user-internal.service';
 import {
@@ -38,20 +39,20 @@ export class UserInternalController {
   }
 
   @Get()
-  @CheckPolicies((ability: AppAbility) => ability.can(Action.User, 'all'))
-  findOne(@Req() req: Request) {
-    return this.userInternalService.findOne(req);
+  @CheckPolicies((ability: AppAbility) => ability.can(Action.General, 'all'))
+  findOne(@Param('id') id: string) {
+    return this.userInternalService.findOne(id);
   }
 
-  @Put()
-  @CheckPolicies((ability: AppAbility) => ability.can(Action.User, 'all'))
-  update(@Body() body: UpdateUserInternalDto, @Req() req: Request) {
-    return this.userInternalService.update(body, req);
+  @Put(':id')
+  @CheckPolicies((ability: AppAbility) => ability.can(Action.General, 'all'))
+  update(@Body() body: UpdateUserInternalDto, @Param('id') id: string) {
+    return this.userInternalService.update(body, id);
   }
 
-  @Delete()
-  @CheckPolicies((ability: AppAbility) => ability.can(Action.User, 'all'))
-  delete(@Req() req: Request) {
-    return this.userInternalService.delete(req);
+  @Delete(':id')
+  @CheckPolicies((ability: AppAbility) => ability.can(Action.General, 'all'))
+  delete(@Param('id') id: string) {
+    return this.userInternalService.delete(id);
   }
 }
