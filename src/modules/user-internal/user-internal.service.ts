@@ -147,11 +147,11 @@ export class UserInternalService {
     }
   }
 
-  async findOne(id: string) {
+  async findOne(req: Request) {
     try {
       const usrInternal = await this.prisma.user_Internal.findFirst({
         where: {
-          userId: id,
+          userId: req.user?.id,
         },
         select: {
           id: true,

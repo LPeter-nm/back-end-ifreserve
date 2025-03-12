@@ -19,6 +19,11 @@ export class UserExternalService {
 
   async registerExternal(body: CreateUserExternalDto, req: Request) {
     const typeUser = req.session.userType;
+    if (!typeUser)
+      throw new HttpException(
+        'É necessário escolher seu tipo de usuário',
+        HttpStatus.EXPECTATION_FAILED,
+      );
 
     const cpfRegistered = await this.prisma.user_External.findUnique({
       where: { cpf: body.cpf },
@@ -43,7 +48,7 @@ export class UserExternalService {
         // Garantindo que só usuários externos possam se registrar
         throw new HttpException(
           'Rota somente para usuários externos ao Intituto',
-          HttpStatus.BAD_REQUEST,
+          HttpStatus.FORBIDDEN,
         );
       }
       const registerUser = await this.prisma.user.create({

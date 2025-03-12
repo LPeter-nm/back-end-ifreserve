@@ -39,9 +39,9 @@ export class UserInternalController {
   }
 
   @Get()
-  @CheckPolicies((ability: AppAbility) => ability.can(Action.General, 'all'))
-  findOne(@Param('id') id: string) {
-    return this.userInternalService.findOne(id);
+  @CheckPolicies((ability: AppAbility) => ability.can(Action.User, 'all'))
+  findOne(@Req() req: Request) {
+    return this.userInternalService.findOne(req);
   }
 
   @Put(':id')
