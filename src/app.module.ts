@@ -12,6 +12,8 @@ import { PrismaService } from './database/PrismaService';
 import { UserTypeMiddleware } from './modules/user/middleware/type-user';
 import { UserController } from './modules/user/user.controller';
 import { UserExternalModule } from './modules/user-external/user-external.module';
+import { ReserveSportModule } from './modules/reserve-sport/reserve-sport.module';
+import { ReserveModule } from './modules/reserve/reserve.module';
 
 @Module({
   imports: [
@@ -24,6 +26,8 @@ import { UserExternalModule } from './modules/user-external/user-external.module
     UserExternalModule,
     CaslModule,
     AuthModule,
+    ReserveSportModule,
+    ReserveModule,
   ],
   providers: [
     {
