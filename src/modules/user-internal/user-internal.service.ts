@@ -72,37 +72,37 @@ export class UserInternalService {
       }
       const randomPass = randomInt(10, 16);
       const hashedPassword = await bcrypt.hash(body.password, randomPass);
-      const registerUser = await this.prisma.user.create({
+      const registerInt = await this.prisma.user.create({
         data: {
           name: body.name,
           email: body.email,
           password: hashedPassword,
           type_User: typeUser,
-        },
-      });
-      const registerUserEsp = await this.prisma.user_Internal.create({
-        data: {
-          userId: registerUser.id,
-          registration: body.registration,
+          userInternal: {
+            create: {
+              registration: body.registration,
+            },
+          },
         },
         select: {
           id: true,
-          user: {
+          name: true,
+          email: true,
+          password: true,
+          status: true,
+          userInternal: {
             select: {
-              name: true,
-              email: true,
-              password: true,
-              status: true,
+              registration: true,
             },
           },
-          registration: true,
           createdAt: true,
           updatedAt: true,
         },
       });
+
       if (!isAluno && typeUser === 'SERVIDOR' && isServer) {
         await this.prisma.user.update({
-          where: { id: registerUser.id },
+          where: { id: registerInt.id },
           data: {
             role: 'ADMIN',
           },
@@ -113,7 +113,7 @@ export class UserInternalService {
           status: HttpStatus.FORBIDDEN,
         };
       }
-      return registerUserEsp;
+      return registerInt;
     } catch (error) {
       return {
         message: 'Erro ao registrar usuário interno',

@@ -51,41 +51,39 @@ export class UserExternalService {
           HttpStatus.FORBIDDEN,
         );
       }
-      const registerUser = await this.prisma.user.create({
+      const registerExternal = await this.prisma.user.create({
         data: {
           name: body.name,
           email: body.email,
           password: hashedPassword,
           type_User: typeUser,
-        },
-      });
-
-      const registerUserEsp = await this.prisma.user_External.create({
-        data: {
-          cpf: body.cpf,
-          phone: body.phone,
-          address: body.address,
-          userId: registerUser.id,
-        },
-        select: {
-          user: {
-            select: {
-              id: true,
-              name: true,
-              email: true,
-              password: true,
-              status: true,
+          userExternal: {
+            create: {
+              cpf: body.cpf,
+              phone: body.phone,
+              address: body.address,
             },
           },
-          cpf: true,
-          phone: true,
-          address: true,
+        },
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          password: true,
+          status: true,
+          userExternal: {
+            select: {
+              cpf: true,
+              phone: true,
+              address: true,
+            },
+          },
           createdAt: true,
           updatedAt: true,
         },
       });
 
-      return registerUserEsp;
+      return registerExternal;
     } catch (error) {
       throw new HttpException(error as string, HttpStatus.BAD_REQUEST);
     }
@@ -121,6 +119,7 @@ export class UserExternalService {
       const usrExternal = await this.prisma.user_External.findFirst({
         where: { userId: req.user?.id },
         select: {
+          id: true,
           user: {
             select: {
               name: true,
