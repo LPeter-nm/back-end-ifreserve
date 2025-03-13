@@ -123,12 +123,12 @@ model Restore {
 // Tabela de reserva 
 model Reserve {
   id String @id @default(uuid())
-  Type_Reserve Type_Reserve @default(OFICIO)
-  ocurrence Ocurrence @default(EVENTO_UNICO)
+  Type_Reserve Type_Reserve
+  ocurrence Ocurrence
   date_Start DateTime
   date_End DateTime
-  hour_Start DateTime
-  hour_End DateTime
+  hour_Start String
+  hour_End String
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
@@ -148,12 +148,12 @@ model Reserve {
 // Tabela de reserva da quadra para ofício
 model Sport {
   id String @id @default(uuid())
-  type_Practice Type_Practice @default(RECREACAO)
+  type_Practice Type_Practice 
   number_People Int 
   participants String 
   request_Equipment String
   status StatusSport @default(PENDENTE)
-  confirmedBy String?
+  anseweredBy String?
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
