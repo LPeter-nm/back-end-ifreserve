@@ -18,7 +18,6 @@ export class UserTypeMiddleware implements NestMiddleware {
       }
 
       req.session.userType = type_User;
-      console.log('✅ Tipo de usuário salvo na sessão:', req.session.userType);
     }
 
     next();

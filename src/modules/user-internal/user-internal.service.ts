@@ -55,8 +55,7 @@ export class UserInternalService {
           HttpStatus.BAD_REQUEST,
         );
 
-      console.log();
-      if (!isAluno || !isServer) {
+      if (!isAluno && !isServer) {
         throw new HttpException(
           'A matrícula não corresponde a nenhum tipo de usuário',
           HttpStatus.EXPECTATION_FAILED,
@@ -93,6 +92,7 @@ export class UserInternalService {
               name: true,
               email: true,
               password: true,
+              status: true,
             },
           },
           registration: true,
@@ -133,6 +133,7 @@ export class UserInternalService {
               email: true,
               type_User: true,
               role: true,
+              status: true,
             },
           },
           registration: true,
@@ -160,6 +161,7 @@ export class UserInternalService {
               name: true,
               email: true,
               password: true,
+              status: true,
             },
           },
           registration: true,
@@ -176,8 +178,8 @@ export class UserInternalService {
     }
   }
 
-  async update(body: UpdateUserInternalDto, id: string) {
-    const userId = id;
+  async update(body: UpdateUserInternalDto, req: Request) {
+    const userId = req.user?.id;
 
     const usrCheck = await this.prisma.user_Internal.findUnique({
       where: { userId },
@@ -213,8 +215,8 @@ export class UserInternalService {
     }
   }
 
-  async delete(id: string) {
-    const userId = id;
+  async delete(req: Request) {
+    const userId = req.user?.id;
 
     const userCheck = await this.prisma.user_Internal.findUnique({
       where: { userId },
@@ -229,6 +231,13 @@ export class UserInternalService {
     try {
       await this.prisma.user_Internal.delete({
         where: { userId },
+      });
+
+      await this.prisma.user.update({
+        where: { id: userId },
+        data: {
+          status: 'INATIVO',
+        },
       });
 
       return {

@@ -13,13 +13,9 @@ export class UserService {
   constructor(private readonly prisma: PrismaService) {}
 
   async choosingUserType(body: CreateUserDto, req: Request) {
-    try {
-      return {
-        message: `Tipo de usuário: ${req.session.userType}`,
-      };
-    } catch (error) {
-      throw new HttpException(error as string, HttpStatus.BAD_REQUEST);
-    }
+    return {
+      message: `Tipo de usuário: ${req.session.userType}`,
+    };
   }
 
   // ficará só para meus testes (lembrar de apagar após termino)
@@ -28,6 +24,7 @@ export class UserService {
       const users = await this.prisma.user.findMany({
         select: {
           id: true,
+          status: true,
           role: true,
           type_User: true,
         },

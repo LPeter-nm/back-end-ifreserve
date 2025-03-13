@@ -74,6 +74,7 @@ export class UserExternalService {
               name: true,
               email: true,
               password: true,
+              status: true,
             },
           },
           cpf: true,
@@ -99,6 +100,7 @@ export class UserExternalService {
               id: true,
               name: true,
               email: true,
+              status: true,
               role: true,
             },
           },
@@ -124,6 +126,7 @@ export class UserExternalService {
               name: true,
               email: true,
               password: true,
+              status: true,
             },
           },
           cpf: true,
@@ -194,15 +197,21 @@ export class UserExternalService {
     const userId = req.user?.id;
 
     const userCheck = await this.prisma.user_External.findUnique({
-      where: { userId: userId },
+      where: { userId },
     });
     if (!userCheck) {
       throw new HttpException('Usuário não encontrado', HttpStatus.NOT_FOUND);
     }
 
     try {
-      await this.prisma.user_External.delete({ where: { userId: userId } });
+      await this.prisma.user_External.delete({ where: { userId } });
 
+      await this.prisma.user.update({
+        where: { id: userId },
+        data: {
+          status: 'INATIVO',
+        },
+      });
       return {
         message: 'Usuário deletado com sucesso',
         status: HttpStatus.NO_CONTENT,
