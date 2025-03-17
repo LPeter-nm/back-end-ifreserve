@@ -154,6 +154,7 @@ model Sport {
   request_Equipment String
   status StatusSport @default(PENDENTE)
   anseweredBy String?
+  comments String?
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
