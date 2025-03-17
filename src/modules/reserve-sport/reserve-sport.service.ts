@@ -305,13 +305,18 @@ export class ReserveSportService {
   }
 
   async remove(id: string) {
-    const reserve = await this.prisma.sport.findFirst({ where: { id } });
+    return this.prisma.$transaction(async (prisma) => {
+      const reserve = await prisma.sport.findFirst({ where: { id } });
 
-    if (!reserve) {
-      throw new HttpException('Reserva não encontrada', HttpStatus.NOT_FOUND);
-    }
-    return handleAsyncOperation(async () => {
-      await this.prisma.sport.delete({ where: { id } });
+      if (!reserve) {
+        throw new HttpException('Reserva não encontrada', HttpStatus.NOT_FOUND);
+      }
+
+      await prisma.sport.delete({ where: { id } });
+
+      await prisma.reserve.delete({
+        where: { id: reserve.reserveId },
+      });
 
       return {
         message: 'Reserva deletada com sucesso',
