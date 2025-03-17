@@ -123,7 +123,7 @@ model Restore {
 // Tabela de reserva 
 model Reserve {
   id String @id @default(uuid())
-  Type_Reserve Type_Reserve
+  type_Reserve Type_Reserve
   ocurrence Ocurrence
   date_Start DateTime
   date_End DateTime
