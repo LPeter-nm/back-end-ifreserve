@@ -14,6 +14,8 @@ import { UserController } from './modules/user/user.controller';
 import { UserExternalModule } from './modules/user-external/user-external.module';
 import { ReserveSportModule } from './modules/reserve-sport/reserve-sport.module';
 import { ReserveModule } from './modules/reserve/reserve.module';
+import { ReserveClassroomModule } from './modules/reserve-classroom/reserve-classroom.module';
+import { ReserveEventModule } from './modules/reserve-event/reserve-event.module';
 
 @Module({
   imports: [
@@ -28,6 +30,8 @@ import { ReserveModule } from './modules/reserve/reserve.module';
     AuthModule,
     ReserveSportModule,
     ReserveModule,
+    ReserveClassroomModule,
+    ReserveEventModule,
   ],
   providers: [
     {
