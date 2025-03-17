@@ -48,6 +48,8 @@ export class CreateReserveSportDto {
 }
 
 export class UpdateReserveSportDto {
+  ocurrence?: Ocurrence;
+
   number_People?: number;
 
   participants?: string;
@@ -55,4 +57,18 @@ export class UpdateReserveSportDto {
   request_Equipment?: string;
 
   type_Practice?: TypePractice;
+
+  date_Start?: string;
+
+  date_End?: string;
+
+  hour_Start?: string;
+
+  hour_End?: string;
+}
+
+export class UpdateStatusSportDto {
+  status: StatusSport;
+
+  anseweredBy: string;
 }
