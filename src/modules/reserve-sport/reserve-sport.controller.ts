@@ -61,8 +61,12 @@ export class ReserveSportController {
 
   @Patch(':id/canceled')
   @CheckPolicies((ability: AppAbility) => ability.can(Action.Admin, 'all'))
-  canceled(@Req() req: Request, @Param('id') id: string) {
-    return this.reserveSportService.updateCanceled(req, id);
+  canceled(
+    @Req() req: Request,
+    @Param('id') id: string,
+    @Body() body: UpdateReserveSportDto,
+  ) {
+    return this.reserveSportService.updateCanceled(req, id, body);
   }
 
   @Patch(':id/refused')

@@ -1,19 +1,6 @@
 import { Ocurrence } from '@prisma/client';
 import { IsNotEmpty } from 'class-validator';
-import { TypeReserve } from 'src/modules/reserve/dto/create-reserve.dto';
-
-export enum TypePractice {
-  TREINO = 'TREINO',
-  RECREACAO = 'RECREACAO',
-  AMISTOSO = 'AMISTOSO',
-}
-
-export enum StatusSport {
-  PENDENTE = 'PENDENTE',
-  CONFIRMADA = 'CONFIRMADA',
-  RECUSADA = 'RECUSADA',
-  CANCELADA = 'CANCELADA',
-}
+import { TypePractice, TypeReserve } from 'src/modules/reserve/dto/reserveDto';
 
 export class CreateReserveSportDto {
   @IsNotEmpty()
@@ -48,6 +35,8 @@ export class CreateReserveSportDto {
 }
 
 export class UpdateReserveSportDto {
+  comments?: string;
+
   ocurrence?: Ocurrence;
 
   number_People?: number;
@@ -65,10 +54,4 @@ export class UpdateReserveSportDto {
   hour_Start?: string;
 
   hour_End?: string;
-}
-
-export class UpdateStatusSportDto {
-  status: StatusSport;
-
-  anseweredBy: string;
 }

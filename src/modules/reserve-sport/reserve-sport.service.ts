@@ -1,9 +1,5 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
-import {
-  CreateReserveSportDto,
-  UpdateReserveSportDto,
-  UpdateStatusSportDto,
-} from './dto/sportDto';
+import { CreateReserveSportDto, UpdateReserveSportDto } from './dto/sportDto';
 import { PrismaService } from 'src/database/PrismaService';
 import { Request } from 'express';
 import { handleAsyncOperation } from 'src/errors/try-catch';
@@ -33,20 +29,39 @@ export class ReserveSportService {
     });
 
     if (reserveCheck) {
-      const sportReserves = await this.prisma.sport.findMany({
+      const pendingReserves = await this.prisma.sport.findMany({
         where: {
           reserveId: reserveCheck.id,
         },
       });
 
-      sportReserves.map(async (sport) => {
-        if (sport.status === 'PENDENTE') {
+      pendingReserves.map((ped) => {
+        if (ped.status === 'PENDENTE') {
           throw new HttpException(
-            'Reservas ainda não resolvidas',
+            'Você tem reservas ainda não resolvidas',
             HttpStatus.CONFLICT,
           );
         }
       });
+    }
+
+    const conflictingReserves = await this.prisma.reserve.findMany({
+      where: {
+        date_Start: { lte: dateEnd },
+        date_End: { gte: dateStart },
+        hour_Start: { lte: body.hour_End },
+        hour_End: { gte: body.hour_Start },
+        sport: {
+          status: 'CONFIRMADA',
+        },
+      },
+    });
+
+    if (conflictingReserves.length > 0) {
+      throw new HttpException(
+        'Já existe uma reserva confirmada para o mesmo horário e data',
+        HttpStatus.CONFLICT,
+      );
     }
 
     return handleAsyncOperation(async () => {
@@ -87,8 +102,14 @@ export class ReserveSportService {
           participants: true,
           request_Equipment: true,
           status: true,
+          anseweredBy: true,
           reserve: {
             select: {
+              user: {
+                select: {
+                  name: true,
+                },
+              },
               ocurrence: true,
               date_Start: true,
               hour_Start: true,
@@ -152,6 +173,25 @@ export class ReserveSportService {
     const dateStart = new Date(body.date_Start as string);
     const dateEnd = new Date(body.date_End as string);
 
+    const conflictingReserves = await this.prisma.reserve.findMany({
+      where: {
+        date_Start: { lte: dateEnd },
+        date_End: { gte: dateStart },
+        hour_Start: { lte: body.hour_End },
+        hour_End: { gte: body.hour_Start },
+        sport: {
+          status: 'CONFIRMADA',
+        },
+      },
+    });
+
+    if (conflictingReserves.length > 0) {
+      throw new HttpException(
+        'Já existe uma reserva confirmada para o mesmo horário e data',
+        HttpStatus.CONFLICT,
+      );
+    }
+
     return handleAsyncOperation(async () => {
       const updatedReserve = await this.prisma.sport.update({
         where: { id },
@@ -205,7 +245,7 @@ export class ReserveSportService {
     });
   }
 
-  async updateCanceled(req: Request, id: string) {
+  async updateCanceled(req: Request, id: string, body: UpdateReserveSportDto) {
     const reserve = await this.prisma.sport.findFirst({ where: { id } });
 
     if (!reserve) {
@@ -228,6 +268,7 @@ export class ReserveSportService {
         data: {
           status: 'CANCELADA',
           anseweredBy: userAdmin.name,
+          comments: body.comments,
         },
       });
       return canceledReserve;
