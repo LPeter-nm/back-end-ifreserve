@@ -5,7 +5,13 @@ CREATE TYPE "Role" AS ENUM ('GENERAL', 'ADMIN', 'USER');
 CREATE TYPE "Type_User" AS ENUM ('ALUNO', 'SERVIDOR', 'EXTERNO');
 
 -- CreateEnum
-CREATE TYPE "Status" AS ENUM ('CONCLUIDO', 'PENDENTE');
+CREATE TYPE "StatusUser" AS ENUM ('ATIVO', 'INATIVO');
+
+-- CreateEnum
+CREATE TYPE "StatusRestore" AS ENUM ('CONCLUIDO', 'PENDENTE');
+
+-- CreateEnum
+CREATE TYPE "StatusSport" AS ENUM ('PENDENTE', 'CONFIRMADA', 'RECUSADA', 'CANCELADA');
 
 -- CreateEnum
 CREATE TYPE "Type_Reserve" AS ENUM ('OFICIO', 'EVENTO', 'AULA');
@@ -24,6 +30,7 @@ CREATE TABLE "User" (
     "password" TEXT NOT NULL,
     "type_User" "Type_User" NOT NULL DEFAULT 'ALUNO',
     "role" "Role" NOT NULL DEFAULT 'USER',
+    "status" "StatusUser" DEFAULT 'ATIVO',
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP(3) NOT NULL,
 
@@ -58,7 +65,7 @@ CREATE TABLE "User_External" (
 CREATE TABLE "Restore" (
     "id" TEXT NOT NULL,
     "token" TEXT NOT NULL,
-    "status" "Status" NOT NULL DEFAULT 'PENDENTE',
+    "status" "StatusRestore" NOT NULL DEFAULT 'PENDENTE',
     "expiration" TIMESTAMP(3) NOT NULL,
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP(3) NOT NULL,
@@ -70,12 +77,12 @@ CREATE TABLE "Restore" (
 -- CreateTable
 CREATE TABLE "Reserve" (
     "id" TEXT NOT NULL,
-    "Type_Reserve" "Type_Reserve" NOT NULL DEFAULT 'OFICIO',
-    "ocurrence" "Ocurrence" NOT NULL DEFAULT 'EVENTO_UNICO',
+    "type_Reserve" "Type_Reserve" NOT NULL DEFAULT 'OFICIO',
+    "ocurrence" "Ocurrence" NOT NULL,
     "date_Start" TIMESTAMP(3) NOT NULL,
     "date_End" TIMESTAMP(3) NOT NULL,
-    "hour_Start" TIMESTAMP(3) NOT NULL,
-    "hour_End" TIMESTAMP(3) NOT NULL,
+    "hour_Start" TEXT NOT NULL,
+    "hour_End" TEXT NOT NULL,
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP(3) NOT NULL,
     "userId" TEXT NOT NULL,
@@ -86,11 +93,13 @@ CREATE TABLE "Reserve" (
 -- CreateTable
 CREATE TABLE "Sport" (
     "id" TEXT NOT NULL,
-    "type_Practice" "Type_Practice" NOT NULL DEFAULT 'RECREACAO',
+    "type_Practice" "Type_Practice" NOT NULL,
     "number_People" INTEGER NOT NULL,
-    "description_People" TEXT NOT NULL,
+    "participants" TEXT NOT NULL,
     "request_Equipment" TEXT NOT NULL,
-    "confirmed" BOOLEAN NOT NULL DEFAULT false,
+    "status" "StatusSport" NOT NULL DEFAULT 'PENDENTE',
+    "anseweredBy" TEXT,
+    "comments" TEXT,
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP(3) NOT NULL,
     "reserveId" TEXT NOT NULL,
@@ -115,6 +124,7 @@ CREATE TABLE "Event" (
     "id" TEXT NOT NULL,
     "name" TEXT NOT NULL,
     "description" TEXT NOT NULL,
+    "location" TEXT NOT NULL,
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP(3) NOT NULL,
     "reserveId" TEXT NOT NULL,
@@ -132,12 +142,36 @@ CREATE TABLE "Report" (
     "description_Equipment" TEXT NOT NULL,
     "time_Used" TEXT NOT NULL,
     "date_Used" TIMESTAMP(3) NOT NULL,
+    "description" TEXT,
+    "comments" TEXT,
+    "status" BOOLEAN NOT NULL DEFAULT false,
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP(3) NOT NULL,
     "reserveId" TEXT NOT NULL,
 
     CONSTRAINT "Report_pkey" PRIMARY KEY ("id")
 );
+
+-- CreateTable
+CREATE TABLE "Notification" (
+    "id" TEXT NOT NULL,
+    "message" TEXT NOT NULL,
+    "read" BOOLEAN NOT NULL DEFAULT false,
+    "userId" TEXT NOT NULL,
+    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updated_at" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "Notification_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateIndex
+CREATE UNIQUE INDEX "User_email_key" ON "User"("email");
+
+-- CreateIndex
+CREATE INDEX "User_email_idx" ON "User"("email");
+
+-- CreateIndex
+CREATE INDEX "User_created_at_idx" ON "User"("created_at");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "User_Internal_registration_key" ON "User_Internal"("registration");
@@ -155,7 +189,16 @@ CREATE UNIQUE INDEX "User_External_userId_key" ON "User_External"("userId");
 CREATE UNIQUE INDEX "Restore_userId_key" ON "Restore"("userId");
 
 -- CreateIndex
+CREATE INDEX "Restore_token_idx" ON "Restore"("token");
+
+-- CreateIndex
 CREATE UNIQUE INDEX "Reserve_userId_key" ON "Reserve"("userId");
+
+-- CreateIndex
+CREATE INDEX "Reserve_date_Start_date_End_idx" ON "Reserve"("date_Start", "date_End");
+
+-- CreateIndex
+CREATE INDEX "Reserve_userId_idx" ON "Reserve"("userId");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "Sport_reserveId_key" ON "Sport"("reserveId");
@@ -192,3 +235,6 @@ ALTER TABLE "Event" ADD CONSTRAINT "Event_reserveId_fkey" FOREIGN KEY ("reserveI
 
 -- AddForeignKey
 ALTER TABLE "Report" ADD CONSTRAINT "Report_reserveId_fkey" FOREIGN KEY ("reserveId") REFERENCES "Reserve"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Notification" ADD CONSTRAINT "Notification_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;

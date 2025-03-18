@@ -1,3 +1,0 @@
--- AlterTable
-ALTER TABLE "Reserve" ALTER COLUMN "hour_Start" SET DATA TYPE TEXT,
-ALTER COLUMN "hour_End" SET DATA TYPE TEXT;
