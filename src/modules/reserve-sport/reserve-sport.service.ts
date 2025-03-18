@@ -2,7 +2,8 @@ import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { CreateReserveSportDto, UpdateReserveSportDto } from './dto/sportDto';
 import { PrismaService } from 'src/database/PrismaService';
 import { Request } from 'express';
-import { handleAsyncOperation } from 'src/errors/try-catch';
+import { handleAsyncOperation } from 'src/validations/prismaValidate';
+import { validateUser } from 'src/validations/authValidate';
 
 @Injectable()
 export class ReserveSportService {
@@ -10,16 +11,8 @@ export class ReserveSportService {
 
   async create(body: CreateReserveSportDto, req: Request) {
     const userId = req.user?.id;
-    const userCheck = await this.prisma.user.findFirst({
-      where: { id: userId },
-    });
 
-    if (!userCheck) {
-      throw new HttpException(
-        'Usuário necessita estar autenticado para solicitar reserva',
-        HttpStatus.UNAUTHORIZED,
-      );
-    }
+    await validateUser(userId as string);
 
     const dateStart = new Date(body.date_Start);
     const dateEnd = new Date(body.date_End);
@@ -67,7 +60,7 @@ export class ReserveSportService {
     return handleAsyncOperation(async () => {
       const reserveRequest = await this.prisma.reserve.create({
         data: {
-          Type_Reserve: 'OFICIO',
+          type_Reserve: 'OFICIO',
           ocurrence: body.ocurrence,
           date_Start: dateStart,
           date_End: dateEnd,
@@ -83,10 +76,18 @@ export class ReserveSportService {
             },
           },
         },
+        include: {
+          user: {
+            select: {
+              name: true,
+            },
+          },
+          sport: true,
+        },
       });
 
       return {
-        nameUser: userCheck.name,
+        nameUser: reserveRequest.user.name,
         reserveRequest,
       };
     });
@@ -153,16 +154,8 @@ export class ReserveSportService {
   }
 
   async update(req: Request, id: string, body: UpdateReserveSportDto) {
-    const verifyUserReserve = await this.prisma.reserve.findFirst({
-      where: { userId: req.user?.id },
-    });
-
-    if (!verifyUserReserve) {
-      throw new HttpException(
-        'Você só pode atualizar as suas reservas',
-        HttpStatus.UNAUTHORIZED,
-      );
-    }
+    const userId = req.user?.id as string;
+    await validateUser(userId, 'Você só pode atualizar suas reservas');
 
     const reserve = await this.prisma.sport.findFirst({ where: { id } });
 
