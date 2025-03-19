@@ -8,6 +8,7 @@ import { Request } from 'express';
 import { validateUser } from 'src/validations/authValidate';
 import { checkConflictingReserves } from 'src/validations/datetimeValidate';
 import { handleAsyncOperation } from 'src/validations/prismaValidate';
+import { validateReservationDates } from 'src/validations/reservationDateValidate';
 
 @Injectable()
 export class ReserveClassroomService {
@@ -20,6 +21,8 @@ export class ReserveClassroomService {
 
     const dateStart = new Date(body.date_Start);
     const dateEnd = new Date(body.date_End);
+
+    validateReservationDates(dateStart, dateEnd);
 
     await checkConflictingReserves(
       dateStart,
@@ -62,7 +65,7 @@ export class ReserveClassroomService {
     });
   }
 
-  findAll() {
+  findAll(req: Request) {
     return handleAsyncOperation(async () => {
       const reserves = await this.prisma.classroom.findMany({
         select: {
@@ -80,6 +83,7 @@ export class ReserveClassroomService {
           },
         },
       });
+      console.log(req.user);
 
       return reserves;
     });
@@ -118,6 +122,8 @@ export class ReserveClassroomService {
 
     const dateStart = new Date(body.date_Start);
     const dateEnd = new Date(body.date_End);
+
+    validateReservationDates(dateStart, dateEnd);
 
     return handleAsyncOperation(async () => {
       const reserveUpdated = await this.prisma.reserve.update({

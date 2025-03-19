@@ -4,6 +4,7 @@ import { PrismaService } from 'src/database/PrismaService';
 import { Request } from 'express';
 import { handleAsyncOperation } from 'src/validations/prismaValidate';
 import { validateUser } from 'src/validations/authValidate';
+import { validateReservationDates } from 'src/validations/reservationDateValidate';
 
 @Injectable()
 export class ReserveSportService {
@@ -16,6 +17,8 @@ export class ReserveSportService {
 
     const dateStart = new Date(body.date_Start);
     const dateEnd = new Date(body.date_End);
+
+    validateReservationDates(dateStart, dateEnd);
 
     const reserveCheck = await this.prisma.reserve.findFirst({
       where: { userId },
@@ -165,6 +168,8 @@ export class ReserveSportService {
 
     const dateStart = new Date(body.date_Start as string);
     const dateEnd = new Date(body.date_End as string);
+
+    validateReservationDates(dateStart, dateEnd);
 
     const conflictingReserves = await this.prisma.reserve.findMany({
       where: {

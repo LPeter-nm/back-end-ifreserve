@@ -32,7 +32,7 @@ export class ReserveEventController {
     return this.reserveEventService.create(createReserveEventDto, req);
   }
 
-  @Get()
+  @Get('reserves')
   @CheckPolicies((ability: AppAbility) => ability.can(Action.Admin, 'all'))
   findAll() {
     return this.reserveEventService.findAll();

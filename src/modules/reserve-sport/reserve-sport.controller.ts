@@ -30,7 +30,7 @@ export class ReserveSportController {
     return this.reserveSportService.create(body, req);
   }
 
-  @Get()
+  @Get('reserves')
   @CheckPolicies((ability: AppAbility) => ability.can(Action.Admin, 'all'))
   findAll() {
     return this.reserveSportService.findAll();

@@ -21,7 +21,7 @@ import { AppAbility } from '../casl/casl-ability.factory/casl-ability.factory';
 import { Action } from '../casl/casl-ability.factory/actionDTO/casl-actionDTO';
 import { Public } from '../auth/skipAuth/skipAuth';
 
-UseGuards(PoliciesGuard);
+@UseGuards(PoliciesGuard)
 @Controller('reserve-classroom')
 export class ReserveClassroomController {
   constructor(
@@ -34,10 +34,10 @@ export class ReserveClassroomController {
     return this.reserveClassroomService.create(body, req);
   }
 
-  @Get()
+  @Get('reserves')
   @CheckPolicies((ability: AppAbility) => ability.can(Action.Admin, 'all'))
-  findAll() {
-    return this.reserveClassroomService.findAll();
+  findAll(@Req() req: Request) {
+    return this.reserveClassroomService.findAll(req);
   }
 
   @Get(':id')
@@ -47,6 +47,7 @@ export class ReserveClassroomController {
   }
 
   @Patch(':id')
+  @CheckPolicies((ability: AppAbility) => ability.can(Action.Admin, 'all'))
   update(
     @Param('id') id: string,
     @Body() body: UpdateReserveClassroomDto,
@@ -56,6 +57,7 @@ export class ReserveClassroomController {
   }
 
   @Delete(':id')
+  @CheckPolicies((ability: AppAbility) => ability.can(Action.Admin, 'all'))
   remove(@Param('id') id: string) {
     return this.reserveClassroomService.remove(id);
   }

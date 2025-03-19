@@ -5,6 +5,7 @@ import { handleAsyncOperation } from 'src/validations/prismaValidate';
 import { PrismaService } from 'src/database/PrismaService';
 import { checkConflictingReserves } from 'src/validations/datetimeValidate';
 import { validateUser } from 'src/validations/authValidate';
+import { validateReservationDates } from 'src/validations/reservationDateValidate';
 
 @Injectable()
 export class ReserveEventService {
@@ -25,6 +26,8 @@ export class ReserveEventService {
 
     const dateStart = new Date(body.date_Start);
     const dateEnd = new Date(body.date_End);
+
+    validateReservationDates(dateStart, dateEnd);
 
     await checkConflictingReserves(
       dateStart,
@@ -126,6 +129,8 @@ export class ReserveEventService {
 
     const dateStart = new Date(body.date_Start);
     const dateEnd = new Date(body.date_End);
+
+    validateReservationDates(dateStart, dateEnd);
 
     await checkConflictingReserves(
       dateStart,

@@ -22,11 +22,9 @@ export class UserService {
   async findAll() {
     try {
       const users = await this.prisma.user.findMany({
-        select: {
-          id: true,
-          status: true,
-          role: true,
-          type_User: true,
+        include: {
+          reserves: true,
+          restores: true,
         },
       });
 
