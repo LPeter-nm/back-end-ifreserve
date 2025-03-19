@@ -43,13 +43,13 @@ export class UserInternalController {
     return this.userInternalService.findOne(req);
   }
 
-  @Put(':id')
+  @Put()
   @CheckPolicies((ability: AppAbility) => ability.can(Action.User, 'all'))
   update(@Body() body: UpdateUserInternalDto, @Req() req: Request) {
     return this.userInternalService.update(body, req);
   }
 
-  @Delete(':id')
+  @Delete()
   @CheckPolicies((ability: AppAbility) => ability.can(Action.User, 'all'))
   delete(@Req() req: Request) {
     return this.userInternalService.delete(req);

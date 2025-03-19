@@ -193,30 +193,31 @@ export class UserExternalService {
   }
 
   async delete(req: Request) {
-    const userId = req.user?.id;
+    return this.prisma.$transaction(async (prisma) => {
+      const userId = req.user?.id;
 
-    const userCheck = await this.prisma.user_External.findUnique({
-      where: { userId },
-    });
-    if (!userCheck) {
-      throw new HttpException('Usuário não encontrado', HttpStatus.NOT_FOUND);
-    }
-
-    try {
-      await this.prisma.user_External.delete({ where: { userId } });
+      const userCheck = await this.prisma.user_External.findUnique({
+        where: { userId },
+      });
+      if (!userCheck) {
+        throw new HttpException('Usuário não encontrado', HttpStatus.NOT_FOUND);
+      }
 
       await this.prisma.user.update({
         where: { id: userId },
         data: {
           status: 'INATIVO',
+          userExternal: {
+            delete: {
+              userId,
+            },
+          },
         },
       });
       return {
         message: 'Usuário deletado com sucesso',
         status: HttpStatus.NO_CONTENT,
       };
-    } catch (error) {
-      throw new HttpException(error as string, HttpStatus.BAD_REQUEST);
-    }
+    });
   }
 }

@@ -49,7 +49,7 @@ export class UserInternalService {
     try {
       const isAluno = /^\d{5}[A-Z]{3}\.[A-Z]{3}\d{4}$/.test(body.registration);
       const isServer = /^\d{4,10}$/.test(body.registration);
-      if (!body.email.includes('@'))
+      if (!body.email.includes('@acad.ifma.edu.br'))
         throw new HttpException(
           'O Email está incorreto',
           HttpStatus.BAD_REQUEST,
@@ -216,27 +216,38 @@ export class UserInternalService {
   }
 
   async delete(req: Request) {
-    const userId = req.user?.id;
+    return this.prisma.$transaction(async (prisma) => {
+      const userId = req.user?.id;
 
-    const userCheck = await this.prisma.user_Internal.findUnique({
-      where: { userId },
-    });
-    if (!userCheck) {
-      throw new HttpException(
-        'Usuário não encontrado no token fornecido',
-        HttpStatus.NOT_FOUND,
-      );
-    }
-
-    try {
-      await this.prisma.user_Internal.delete({
+      const userCheck = await this.prisma.user_Internal.findUnique({
         where: { userId },
+        include: {
+          user: true,
+        },
       });
+      if (!userCheck) {
+        throw new HttpException(
+          'Usuário não encontrado no token fornecido',
+          HttpStatus.NOT_FOUND,
+        );
+      }
+
+      if (userCheck.user.role === 'GENERAL') {
+        throw new HttpException(
+          'Não é permitido deletar o administrador geral | é necessário autorização prévia',
+          HttpStatus.UNAUTHORIZED,
+        );
+      }
 
       await this.prisma.user.update({
         where: { id: userId },
         data: {
           status: 'INATIVO',
+          userInternal: {
+            delete: {
+              userId,
+            },
+          },
         },
       });
 
@@ -244,11 +255,6 @@ export class UserInternalService {
         message: 'Usuário deletado com sucesso',
         status: HttpStatus.NO_CONTENT,
       };
-    } catch (error) {
-      return {
-        message: 'Erro ao deletar usuário interno',
-        error: error,
-      };
-    }
+    });
   }
 }
