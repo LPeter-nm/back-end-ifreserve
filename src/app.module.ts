@@ -16,6 +16,8 @@ import { ReserveSportModule } from './modules/reserve-sport/reserve-sport.module
 import { ReserveModule } from './modules/reserve/reserve.module';
 import { ReserveClassroomModule } from './modules/reserve-classroom/reserve-classroom.module';
 import { ReserveEventModule } from './modules/reserve-event/reserve-event.module';
+import { EmailModule } from './modules/email/email.module';
+import { RestoreModule } from './modules/restore/restore.module';
 
 @Module({
   imports: [
@@ -32,6 +34,8 @@ import { ReserveEventModule } from './modules/reserve-event/reserve-event.module
     ReserveModule,
     ReserveClassroomModule,
     ReserveEventModule,
+    EmailModule,
+    RestoreModule,
   ],
   providers: [
     {

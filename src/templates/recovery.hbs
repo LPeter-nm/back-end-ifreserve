@@ -1,0 +1,78 @@
+<html lang='pt-br'>
+  <head>
+    <meta charset='UTF-8' />
+    <meta name='viewport' content='width=device-width, initial-scale=1.0' />
+    <title>Recuperação de Senha</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        background-color: #f4f7f6;
+        margin: 0;
+        padding: 0;
+      }
+      .container {
+        background-color: #ffffff;
+        border-radius: 8px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        width: 100%;
+        max-width: 600px;
+        margin: 40px auto;
+        padding: 20px;
+        text-align: center;
+      }
+      h1 {
+        color: #333;
+        font-size: 24px;
+      }
+      h2 {
+        color: #1d72b8;
+        font-size: 32px;
+        font-weight: bold;
+        margin-top: 10px;
+      }
+      p {
+        color: #555;
+        font-size: 16px;
+        line-height: 1.6;
+        margin-bottom: 20px;
+      }
+      .footer {
+        text-align: center;
+        padding: 20px;
+        background-color: #f9f9f9;
+        border-top: 1px solid #e0e0e0;
+      }
+      .footer p {
+        font-size: 12px;
+        color: #888;
+      }
+      @media screen and (max-width: 600px) {
+        .container {
+          padding: 15px;
+        }
+        h1 {
+          font-size: 20px;
+        }
+        h2 {
+          font-size: 28px;
+        }
+        p {
+          font-size: 14px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class='container'>
+      <h1>Olá, {{username}}!</h1>
+      <p>Recebemos sua solicitação para redefinir sua senha.</p>
+      <p>Seu código de recuperação é:</p>
+      <h2>{{code}}</h2>
+      <p>Se você não solicitou esta recuperação, ignore este e-mail.</p>
+      <p>Obrigado, a equipe do nosso projeto!</p>
+    </div>
+    <div class='footer'>
+      <p>Este é um e-mail automático. Não responda.</p>
+    </div>
+  </body>
+</html>
