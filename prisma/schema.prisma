@@ -107,17 +107,15 @@ model User_External {
 
 // Tabela restauração de senha
 model Restore {
-  id String @id @default(uuid())
-  token String
-  status StatusRestore @default(PENDENTE)
-  expiration DateTime
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
+  id           String   @id @default(uuid())
+  userId       String
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  token        String
+  used         Boolean  @default(false)
+  createdAt    DateTime @default(now()) @map("created_at")
+  expirationAt DateTime @map("updated_at")
 
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId String @unique
-
-  @@index([token]) 
+  @@map("restores")
 }
 
 // Tabela de reserva 
