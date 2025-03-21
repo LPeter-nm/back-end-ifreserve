@@ -55,8 +55,12 @@ export class ReserveSportController {
 
   @Patch(':id/confirmed')
   @CheckPolicies((ability: AppAbility) => ability.can(Action.Admin, 'all'))
-  confirmed(@Req() req: Request, @Param('id') id: string) {
-    return this.reserveSportService.updateConfirmed(req, id);
+  confirmed(
+    @Req() req: Request,
+    @Param('id') id: string,
+    @Body() body: UpdateReserveSportDto,
+  ) {
+    return this.reserveSportService.updateConfirmed(req, id, body);
   }
 
   @Patch(':id/canceled')
@@ -71,8 +75,12 @@ export class ReserveSportController {
 
   @Patch(':id/refused')
   @CheckPolicies((ability: AppAbility) => ability.can(Action.Admin, 'all'))
-  refused(@Req() req: Request, @Param('id') id: string) {
-    return this.reserveSportService.updateRefused(req, id);
+  refused(
+    @Req() req: Request,
+    @Param('id') id: string,
+    @Body() body: UpdateReserveSportDto,
+  ) {
+    return this.reserveSportService.updateRefused(req, id, body);
   }
 
   @Delete(':id')

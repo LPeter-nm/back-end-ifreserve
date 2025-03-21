@@ -18,6 +18,8 @@ import { ReserveClassroomModule } from './modules/reserve-classroom/reserve-clas
 import { ReserveEventModule } from './modules/reserve-event/reserve-event.module';
 import { EmailModule } from './modules/email/email.module';
 import { RestoreModule } from './modules/restore/restore.module';
+import { ReportModule } from './modules/report/report.module';
+import { NotificationModule } from './modules/notification/notification.module';
 
 @Module({
   imports: [
@@ -36,6 +38,8 @@ import { RestoreModule } from './modules/restore/restore.module';
     ReserveEventModule,
     EmailModule,
     RestoreModule,
+    ReportModule,
+    NotificationModule,
   ],
   providers: [
     {

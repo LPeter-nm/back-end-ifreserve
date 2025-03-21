@@ -5,15 +5,19 @@ import { Request } from 'express';
 import { handleAsyncOperation } from 'src/validations/prismaValidate';
 import { validateUser } from 'src/validations/authValidate';
 import { validateReservationDates } from 'src/validations/reservationDateValidate';
+import { NotificationService } from '../notification/notification.service';
 
 @Injectable()
 export class ReserveSportService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly notificationService: NotificationService,
+  ) {}
 
   async create(body: CreateReserveSportDto, req: Request) {
-    const userId = req.user?.id;
+    const userId = req.user?.id as string;
 
-    await validateUser(userId as string);
+    await validateUser(userId);
 
     const dateStart = new Date(body.date_Start);
     const dateEnd = new Date(body.date_End);
@@ -88,6 +92,12 @@ export class ReserveSportService {
           sport: true,
         },
       });
+
+      await this.notificationService.create(
+        'Reserva solicitada',
+        'Sua reserva foi solicitada com sucesso',
+        req,
+      );
 
       return {
         nameUser: reserveRequest.user.name,
@@ -210,11 +220,17 @@ export class ReserveSportService {
         },
       });
 
+      await this.notificationService.create(
+        'Reserva Atualizada',
+        'Sua reserva foi atualizada e solicitada com sucesso',
+        req,
+      );
+
       return updatedReserve;
     });
   }
 
-  async updateConfirmed(req: Request, id: string) {
+  async updateConfirmed(req: Request, id: string, body: UpdateReserveSportDto) {
     const reserve = await this.prisma.sport.findFirst({ where: { id } });
 
     if (!reserve) {
@@ -237,8 +253,24 @@ export class ReserveSportService {
         data: {
           status: 'CONFIRMADA',
           anseweredBy: userAdmin.name,
+          comments: body.comments,
+        },
+        include: {
+          reserve: {
+            select: {
+              user: true,
+            },
+          },
         },
       });
+
+      await this.notificationService.create(
+        'Reserva Confirmada',
+        `Sua reserva foi atualizada pelo servidor ${confirmedReserve.anseweredBy}`,
+        req,
+        confirmedReserve.reserve.user.id,
+      );
+
       return confirmedReserve;
     });
   }
@@ -268,12 +300,27 @@ export class ReserveSportService {
           anseweredBy: userAdmin.name,
           comments: body.comments,
         },
+        include: {
+          reserve: {
+            select: {
+              user: true,
+            },
+          },
+        },
       });
+
+      await this.notificationService.create(
+        'Reserva Cancelada',
+        `Sua reserva foi atualizada pelo servidor ${canceledReserve.anseweredBy}`,
+        req,
+        canceledReserve.reserve.user.id,
+      );
+
       return canceledReserve;
     });
   }
 
-  async updateRefused(req: Request, id: string) {
+  async updateRefused(req: Request, id: string, body: UpdateReserveSportDto) {
     const reserve = await this.prisma.sport.findFirst({ where: { id } });
 
     if (!reserve) {
@@ -296,8 +343,24 @@ export class ReserveSportService {
         data: {
           status: 'RECUSADA',
           anseweredBy: userAdmin.name,
+          comments: body.comments,
+        },
+        include: {
+          reserve: {
+            select: {
+              user: true,
+            },
+          },
         },
       });
+
+      await this.notificationService.create(
+        'Reserva Recusada',
+        `Sua reserva foi recusada pelo servidor ${refusedReserve.anseweredBy}`,
+        req,
+        refusedReserve.reserve.user.id,
+      );
+
       return refusedReserve;
     });
   }
