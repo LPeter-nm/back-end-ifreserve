@@ -6,6 +6,8 @@ import {
   Patch,
   Post,
   UseGuards,
+  HttpException,
+  HttpStatus,
 } from '@nestjs/common';
 import {
   NewPassword,
@@ -26,25 +28,41 @@ export class RestoreController {
 
   @Post()
   @Public()
-  create(@Body() body: PasswordRedefinition) {
-    return this.restoreService.createToken(body);
+  async create(@Body() body: PasswordRedefinition) {
+    try {
+      return await this.restoreService.createToken(body);
+    } catch (error) {
+      throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
+    }
   }
 
   @Get(':userId')
   @CheckPolicies((ability: AppAbility) => ability.can(Action.Admin, 'all'))
-  findAllTokens(@Param('userId') userId: string) {
-    return this.restoreService.findAllTokens(userId);
+  async findAllTokens(@Param('userId') userId: string) {
+    try {
+      return await this.restoreService.findAllTokens(userId);
+    } catch (error) {
+      throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
+    }
   }
 
   @Post('confirmed')
   @Public()
-  confirmToken(@Body() body: TokenConfirmed) {
-    return this.restoreService.confirmToken(body);
+  async confirmToken(@Body() body: TokenConfirmed) {
+    try {
+      return await this.restoreService.confirmToken(body);
+    } catch (error) {
+      throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
+    }
   }
 
   @Patch('new-credentials')
   @Public()
-  updatePassword(@Body() body: NewPassword) {
-    return this.restoreService.updatePassword(body);
+  async updatePassword(@Body() body: NewPassword) {
+    try {
+      return await this.restoreService.updatePassword(body);
+    } catch (error) {
+      throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
+    }
   }
 }

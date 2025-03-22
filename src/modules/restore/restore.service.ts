@@ -23,8 +23,24 @@ export class RestoreService {
       },
     });
 
-    if (!userCheck)
+    if (!userCheck) {
       throw new HttpException(`Usuário inexistente!`, HttpStatus.NOT_FOUND);
+    }
+
+    const activeToken = await this.prismaService.restore.findFirst({
+      where: {
+        userId: userCheck.id,
+        expirationAt: { gt: new Date() },
+        used: false,
+      },
+    });
+
+    if (activeToken) {
+      throw new HttpException(
+        'Já existe um token ativo para este usuário.',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
 
     const randomToken = String(randomInt(1000, 9999));
     const context = {
@@ -32,27 +48,34 @@ export class RestoreService {
       code: randomToken,
     };
 
-    this.emailService.sendEmail(
+    await this.emailService.sendEmail(
       userCheck.email,
       'Recuperação de Senha',
       'recovery',
       context,
     );
 
+    const expirationTime = parseInt(
+      process.env.TOKEN_EXPIRATION_MINUTES || '20',
+      10,
+    );
+    const expirationAt = new Date(Date.now() + expirationTime * 60 * 1000);
+
     try {
       const passwordRedefinition = await this.prismaService.restore.create({
         data: {
           token: randomToken,
-          expirationAt: new Date(Date.now() + 20 * 60 * 1000),
+          expirationAt,
           userId: userCheck.id,
         },
       });
 
-      if (!passwordRedefinition)
+      if (!passwordRedefinition) {
         throw new HttpException(
           `Erro ao criar token de recuperação de usuário!`,
           HttpStatus.EXPECTATION_FAILED,
         );
+      }
 
       return {
         message:
@@ -60,10 +83,11 @@ export class RestoreService {
         passwordRedefinition,
       };
     } catch (error) {
-      return {
-        message: 'Ocorreu algum erro e o token não foi enviado!',
-        error,
-      };
+      console.error('Erro ao criar token:', error.message, error.stack);
+      throw new HttpException(
+        'Erro ao criar token de recuperação.',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
     }
   }
 
@@ -82,18 +106,20 @@ export class RestoreService {
       },
     });
 
-    if (!restore)
+    if (!restore) {
       throw new HttpException(`Token inexistente!`, HttpStatus.NOT_FOUND);
+    }
 
     if (restore.expirationAt.getTime() < new Date().getTime()) {
       throw new HttpException(`O token está expirado!`, HttpStatus.NOT_FOUND);
     }
 
-    if (restore.used)
+    if (restore.used) {
       throw new HttpException(
         `O token já foi utilizado!`,
         HttpStatus.BAD_REQUEST,
       );
+    }
 
     if (restore.token !== body.token) {
       throw new HttpException(
@@ -124,18 +150,20 @@ export class RestoreService {
       },
     });
 
-    if ((tokenCheck?.expirationAt.getTime() as number) < new Date().getTime()) {
-      throw new HttpException(`O token está expirado!`, HttpStatus.NOT_FOUND);
-    }
-
-    if (!tokenCheck)
+    if (!tokenCheck) {
       throw new HttpException(
         `Token inexistente ou o Token não está associado ao usuário especificado!`,
         HttpStatus.NOT_FOUND,
       );
+    }
 
-    if (tokenCheck.used !== true)
+    if (tokenCheck.expirationAt.getTime() < new Date().getTime()) {
+      throw new HttpException(`O token está expirado!`, HttpStatus.NOT_FOUND);
+    }
+
+    if (tokenCheck.used !== true) {
       throw new HttpException(`Token inválido!`, HttpStatus.UNAUTHORIZED);
+    }
 
     const ramdomSalt = randomInt(10, 16);
     const hashPassword = await bcript.hash(body.password, ramdomSalt);
@@ -149,11 +177,12 @@ export class RestoreService {
       },
     });
 
-    if (!userUpdate)
+    if (!userUpdate) {
       throw new HttpException(
         `Ocorreu um erro ao atualizar a senha do usuário!`,
         HttpStatus.EXPECTATION_FAILED,
       );
+    }
 
     return {
       message: 'Senha atualizada com sucesso!',
@@ -170,8 +199,9 @@ export class RestoreService {
       },
     });
 
-    if (!user)
+    if (!user) {
       throw new HttpException(`Usuário inexistente!`, HttpStatus.NOT_FOUND);
+    }
 
     return {
       user,

@@ -11,6 +11,8 @@ type context = {
 
 @Injectable()
 export class EmailService {
+  private templates: Record<string, HandlebarsTemplateDelegate> = {};
+
   constructor(
     @Inject('MAIL_TRANSPORT') private transporter: nodemailer.Transporter,
   ) {}
@@ -19,14 +21,19 @@ export class EmailService {
     templateName: string,
     context: context,
   ): Promise<string> {
-    const templatePath = path.join(
-      __dirname,
-      '../../../src/templates',
-      `${templateName}.hbs`,
-    );
-    const templateSource = fs.readFileSync(templatePath, 'utf8');
-    const compiledTemplate = handlebars.compile(templateSource);
-    return compiledTemplate(context);
+    if (!this.templates[templateName]) {
+      const templatePath = path.join(
+        __dirname,
+        '../../../src/templates',
+        `${templateName}.hbs`,
+      );
+      if (!fs.existsSync(templatePath)) {
+        throw new Error(`Template ${templateName} não encontrado.`);
+      }
+      const templateSource = fs.readFileSync(templatePath, 'utf8');
+      this.templates[templateName] = handlebars.compile(templateSource);
+    }
+    return this.templates[templateName](context);
   }
 
   async sendEmail(
@@ -46,10 +53,11 @@ export class EmailService {
 
     try {
       const info = await this.transporter.sendMail(mailOptions);
+      console.log(`E-mail enviado para ${to}: ${info.messageId}`);
       return info;
     } catch (error) {
-      console.error('Erro ao enviar e-mail:', error);
-      throw error;
+      console.error('Erro ao enviar e-mail:', error.message, error.stack);
+      throw new Error('Falha ao enviar e-mail.');
     }
   }
 }
