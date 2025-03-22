@@ -139,7 +139,7 @@ export class RestoreService {
 
     return {
       message: 'O token foi enviado corretamente, agora digite sua nova senha!',
-      tokenConfirmed,
+      tokenConfirmed: tokenConfirmed.used,
     };
   }
 

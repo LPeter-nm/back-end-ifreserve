@@ -53,7 +53,7 @@ export class EmailService {
 
     try {
       const info = await this.transporter.sendMail(mailOptions);
-      console.log(`E-mail enviado para ${to}: ${info.messageId}`);
+      console.log(`E-mail enviado para ${to}`);
       return info;
     } catch (error) {
       console.error('Erro ao enviar e-mail:', error.message, error.stack);
