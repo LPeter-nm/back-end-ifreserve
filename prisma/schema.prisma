@@ -64,7 +64,6 @@ model User {
   role Role @default(USER)
   status StatusUser? @default(ATIVO)
   createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
 
   // Relacionamentos
   userInternal User_Internal?
@@ -129,7 +128,6 @@ model Reserve {
   hour_End String
 
   createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId String @unique
@@ -217,5 +215,4 @@ model Notification {
   userId String
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
   createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
 }
