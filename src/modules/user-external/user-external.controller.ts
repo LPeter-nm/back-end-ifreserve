@@ -1,4 +1,3 @@
-// Importações
 import {
   Controller,
   Get,

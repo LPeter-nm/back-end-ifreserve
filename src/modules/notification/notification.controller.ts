@@ -1,14 +1,4 @@
-import {
-  Controller,
-  Post,
-  Body,
-  Get,
-  Delete,
-  Param,
-  Req,
-  UseGuards,
-  Patch,
-} from '@nestjs/common';
+import { Controller, Get, Delete, Param, Req, UseGuards } from '@nestjs/common';
 import { NotificationService } from './notification.service';
 import { PoliciesGuard } from '../casl/guards/policies.guard';
 import { CheckPolicies } from '../casl/guards/policies.check';
