@@ -8,6 +8,7 @@ import {
   TokenConfirmed,
 } from './dto/restoreDto';
 import { EmailService } from '../email/email.service';
+import { handleAsyncOperation } from 'src/validations/prismaValidate';
 
 @Injectable()
 export class RestoreService {
@@ -61,7 +62,7 @@ export class RestoreService {
     );
     const expirationAt = new Date(Date.now() + expirationTime * 60 * 1000);
 
-    try {
+    return handleAsyncOperation(async () => {
       const passwordRedefinition = await this.prismaService.restore.create({
         data: {
           token: randomToken,
@@ -82,65 +83,62 @@ export class RestoreService {
           'Token de redefinição enviado com sucesso! O tempo de expiração dele é de 20 minutos!',
         passwordRedefinition,
       };
-    } catch (error) {
-      console.error('Erro ao criar token:', error.message, error.stack);
-      throw new HttpException(
-        'Erro ao criar token de recuperação.',
-        HttpStatus.INTERNAL_SERVER_ERROR,
-      );
-    }
+    });
   }
 
   async confirmToken(body: TokenConfirmed) {
-    const restore = await this.prismaService.restore.findUnique({
-      where: {
-        id: body.tokenId,
-        used: false,
-      },
-      select: {
-        id: true,
-        token: true,
-        used: true,
-        expirationAt: true,
-        user: true,
-      },
+    return handleAsyncOperation(async () => {
+      const restore = await this.prismaService.restore.findUnique({
+        where: {
+          id: body.tokenId,
+          used: false,
+        },
+        select: {
+          id: true,
+          token: true,
+          used: true,
+          expirationAt: true,
+          user: true,
+        },
+      });
+
+      if (!restore) {
+        throw new HttpException(`Token inexistente!`, HttpStatus.NOT_FOUND);
+      }
+
+      if (restore.expirationAt.getTime() < new Date().getTime()) {
+        throw new HttpException(`O token está expirado!`, HttpStatus.NOT_FOUND);
+      }
+
+      if (restore.used) {
+        throw new HttpException(
+          `O token já foi utilizado!`,
+          HttpStatus.BAD_REQUEST,
+        );
+      }
+
+      if (restore.token !== body.token) {
+        throw new HttpException(
+          `O token enviado não corresponde ao enviado ao email! Tente novamente com outro token de redefinição.`,
+          HttpStatus.UNAUTHORIZED,
+        );
+      }
+
+      const tokenConfirmed = await this.prismaService.restore.update({
+        where: {
+          id: restore.id,
+        },
+        data: {
+          used: true,
+        },
+      });
+
+      return {
+        message:
+          'O token foi enviado corretamente, agora digite sua nova senha!',
+        tokenConfirmed,
+      };
     });
-
-    if (!restore) {
-      throw new HttpException(`Token inexistente!`, HttpStatus.NOT_FOUND);
-    }
-
-    if (restore.expirationAt.getTime() < new Date().getTime()) {
-      throw new HttpException(`O token está expirado!`, HttpStatus.NOT_FOUND);
-    }
-
-    if (restore.used) {
-      throw new HttpException(
-        `O token já foi utilizado!`,
-        HttpStatus.BAD_REQUEST,
-      );
-    }
-
-    if (restore.token !== body.token) {
-      throw new HttpException(
-        `O token enviado não corresponde ao enviado ao email! Tente novamente com outro token de redefinição.`,
-        HttpStatus.UNAUTHORIZED,
-      );
-    }
-
-    const tokenConfirmed = await this.prismaService.restore.update({
-      where: {
-        id: restore.id,
-      },
-      data: {
-        used: true,
-      },
-    });
-
-    return {
-      message: 'O token foi enviado corretamente, agora digite sua nova senha!',
-      tokenConfirmed,
-    };
   }
 
   async updatePassword(body: NewPassword) {
@@ -168,43 +166,40 @@ export class RestoreService {
     const ramdomSalt = randomInt(10, 16);
     const hashPassword = await bcript.hash(body.password, ramdomSalt);
 
-    const userUpdate = await this.prismaService.user.update({
-      where: {
-        id: tokenCheck.userId,
-      },
-      data: {
-        password: hashPassword,
-      },
+    return handleAsyncOperation(async () => {
+      await this.prismaService.user.update({
+        where: {
+          id: tokenCheck.userId,
+        },
+        data: {
+          password: hashPassword,
+        },
+      });
+
+      return {
+        message: 'Senha atualizada com sucesso!',
+      };
     });
-
-    if (!userUpdate) {
-      throw new HttpException(
-        `Ocorreu um erro ao atualizar a senha do usuário!`,
-        HttpStatus.EXPECTATION_FAILED,
-      );
-    }
-
-    return {
-      message: 'Senha atualizada com sucesso!',
-    };
   }
 
   async findAllTokens(userId: string) {
-    const user = await this.prismaService.user.findUnique({
-      where: {
-        id: userId,
-      },
-      select: {
-        restores: true,
-      },
+    return handleAsyncOperation(async () => {
+      const user = await this.prismaService.user.findUnique({
+        where: {
+          id: userId,
+        },
+        select: {
+          restores: true,
+        },
+      });
+
+      if (!user) {
+        throw new HttpException(`Usuário inexistente!`, HttpStatus.NOT_FOUND);
+      }
+
+      return {
+        user,
+      };
     });
-
-    if (!user) {
-      throw new HttpException(`Usuário inexistente!`, HttpStatus.NOT_FOUND);
-    }
-
-    return {
-      user,
-    };
   }
 }

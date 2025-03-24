@@ -62,25 +62,23 @@ export class UserService {
   }
 
   async delete(id: string) {
-    const user = await this.prisma.user.findUnique({ where: { id } });
+    return this.prisma.$transaction(async (prisma) => {
+      const user = await prisma.user.findUnique({ where: { id } });
 
-    if (!user)
-      throw new HttpException('Usuário não encontrado', HttpStatus.NOT_FOUND);
+      if (!user)
+        throw new HttpException('Usuário não encontrado', HttpStatus.NOT_FOUND);
 
-    if (user.role === 'GENERAL')
-      throw new ForbiddenException(
-        'Não é permitido excluir o administrador geral',
-      );
+      if (user.role === 'GENERAL')
+        throw new ForbiddenException(
+          'Não é permitido excluir o administrador geral',
+        );
 
-    try {
-      await this.prisma.user.delete({ where: { id } });
+      await prisma.user.delete({ where: { id } });
 
       return {
         message: 'Usuário deletado com sucesso',
         status: HttpStatus.OK,
       };
-    } catch (error) {
-      throw new HttpException(error as string, HttpStatus.BAD_REQUEST);
-    }
+    });
   }
 }

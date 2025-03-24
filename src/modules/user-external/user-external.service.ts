@@ -34,6 +34,13 @@ export class UserExternalService {
         HttpStatus.BAD_REQUEST,
       );
 
+    if (body.password.length < 8) {
+      throw new HttpException(
+        'É necessário que a senha tenha pelo menos 8 caracteres',
+        HttpStatus.EXPECTATION_FAILED,
+      );
+    }
+
     try {
       const randomPass = randomInt(10, 16);
       const hashedPassword = await bcrypt.hash(body.password, randomPass);
@@ -196,14 +203,14 @@ export class UserExternalService {
     return this.prisma.$transaction(async (prisma) => {
       const userId = req.user?.id;
 
-      const userCheck = await this.prisma.user_External.findUnique({
+      const userCheck = await prisma.user_External.findUnique({
         where: { userId },
       });
       if (!userCheck) {
         throw new HttpException('Usuário não encontrado', HttpStatus.NOT_FOUND);
       }
 
-      await this.prisma.user.update({
+      await prisma.user.update({
         where: { id: userId },
         data: {
           status: 'INATIVO',

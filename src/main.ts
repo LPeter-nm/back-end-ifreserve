@@ -3,6 +3,7 @@ import { AppModule } from './app.module';
 import * as express from 'express';
 import * as session from 'express-session';
 import * as dotenv from 'dotenv';
+import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 
 dotenv.config();
 
@@ -25,6 +26,39 @@ async function bootstrap() {
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
     allowedHeaders: 'Content-Type, Accept, Authorization',
   });
+
+  const config = new DocumentBuilder()
+
+    .setTitle('API IFReserve')
+    .setDescription(
+      'API para sugestão de implementação no SUAP com o objetivo de reservar a quadra do Instituto Federal do Maranhão para momentos recreativos e de treinamentos visando facilitar interação entre aluno ou pessoas externas e servidores',
+    )
+    .setVersion('1.0')
+    .addBearerAuth(
+      {
+        type: 'http',
+        scheme: 'bearer',
+        bearerFormat: 'JWT',
+      },
+      'access_token',
+    )
+
+    .addTag('Login')
+    .addTag('Usuário')
+    .addTag('Usuário Interno')
+    .addTag('Usuário Externo')
+    .addTag('Reserva')
+    .addTag('Reserva')
+    .addTag('Reserva - Ofício')
+    .addTag('Reserva - Aula')
+    .addTag('Reserva - Evento')
+    .addTag('Relatório')
+    .addTag('Recuperação de senha')
+    .addTag('Notificação')
+    .build();
+
+  const documentFactory = () => SwaggerModule.createDocument(app, config);
+  SwaggerModule.setup('docs', app, documentFactory);
 
   await app.listen(process.env.PORT ?? 3000);
 }

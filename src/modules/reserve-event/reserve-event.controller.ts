@@ -17,13 +17,17 @@ import { CheckPolicies } from '../casl/guards/policies.check';
 import { AppAbility } from '../casl/casl-ability.factory/casl-ability.factory';
 import { Action } from '../casl/casl-ability.factory/actionDTO/casl-actionDTO';
 import { Public } from '../auth/skipAuth/skipAuth';
+import { ApiResponse, ApiTags } from '@nestjs/swagger';
 
+@ApiTags('Reserva - Evento')
 @UseGuards(PoliciesGuard)
 @Controller('reserve-event')
 export class ReserveEventController {
   constructor(private readonly reserveEventService: ReserveEventService) {}
 
   @Post()
+  @ApiResponse({ status: 400, description: 'Erro ao criar reserva' })
+  @ApiResponse({ status: 500, description: 'Erro interno do servidor' })
   @CheckPolicies((ability: AppAbility) => ability.can(Action.Admin, 'all'))
   create(
     @Body() createReserveEventDto: CreateReserveEventDto,
