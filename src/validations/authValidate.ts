@@ -5,7 +5,7 @@ const prisma = new PrismaClient();
 
 export async function validateUser(
   userId: string,
-  errorMessage: string = 'Usuário necessita estar autenticado para cadastrar reserva',
+  errorMessage: string = 'Erro na requisição do usuário',
   statusCode: number = HttpStatus.UNAUTHORIZED,
 ) {
   const userCheck = await prisma.user.findFirst({
