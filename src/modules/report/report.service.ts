@@ -9,10 +9,10 @@ import { handleAsyncOperation } from 'src/validations/prismaValidate';
 export class ReportService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async create(body: CreateReportDto, req: Request, reserveId: string) {
+  async create(body: CreateReportDto, req: Request, sportId: string) {
     const userId = req.user?.id as string;
 
-    await validateUser(userId, 'Usuário não encontrado');
+    await validateUser(userId);
 
     return handleAsyncOperation(async () => {
       const userFound = await this.prisma.user.findFirst({
@@ -23,7 +23,7 @@ export class ReportService {
         data: {
           ...body,
           name_User: userFound?.name as string,
-          reserveId,
+          sportId,
         },
       });
 
@@ -47,6 +47,7 @@ export class ReportService {
   findOne(id: string) {
     return handleAsyncOperation(async () => {
       const report = await this.prisma.report.findFirst({
+        where: { id },
         select: {
           id: true,
           name_User: true,
@@ -57,9 +58,16 @@ export class ReportService {
           description_Equipment: true,
           time_Used: true,
           date_Used: true,
-          reserve: true,
+          sport: true,
         },
       });
+
+      if (!report) {
+        throw new HttpException(
+          'Relatório não encontrado',
+          HttpStatus.NOT_FOUND,
+        );
+      }
 
       return report;
     });
@@ -98,12 +106,14 @@ export class ReportService {
           status: true,
         },
       });
+
+      return updatedReportStatus;
     });
   }
 
   async remove(id: string) {
     return this.prisma.$transaction(async (prisma) => {
-      const reportFound = await this.prisma.report.findFirst({ where: { id } });
+      const reportFound = await prisma.report.findFirst({ where: { id } });
 
       if (!reportFound) {
         throw new HttpException(
