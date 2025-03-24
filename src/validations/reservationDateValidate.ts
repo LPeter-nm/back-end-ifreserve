@@ -8,7 +8,7 @@ export function validateReservationDates(dateStart: Date, dateEnd: Date) {
   if (dateStart < currentDate || dateEnd < currentDate) {
     throw new HttpException(
       'Não é permitido registrar reservas em datas anteriores à data atual.',
-      HttpStatus.BAD_REQUEST,
+      HttpStatus.EXPECTATION_FAILED,
     );
   }
 }

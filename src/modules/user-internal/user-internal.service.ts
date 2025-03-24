@@ -219,7 +219,7 @@ export class UserInternalService {
     return this.prisma.$transaction(async (prisma) => {
       const userId = req.user?.id;
 
-      const userCheck = await this.prisma.user_Internal.findUnique({
+      const userCheck = await prisma.user_Internal.findUnique({
         where: { userId },
         include: {
           user: true,
@@ -239,7 +239,7 @@ export class UserInternalService {
         );
       }
 
-      await this.prisma.user.update({
+      await prisma.user.update({
         where: { id: userId },
         data: {
           status: 'INATIVO',

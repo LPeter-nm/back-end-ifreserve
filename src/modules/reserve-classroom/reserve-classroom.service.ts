@@ -65,7 +65,7 @@ export class ReserveClassroomService {
     });
   }
 
-  findAll(req: Request) {
+  findAll() {
     return handleAsyncOperation(async () => {
       const reserves = await this.prisma.classroom.findMany({
         select: {
@@ -83,7 +83,6 @@ export class ReserveClassroomService {
           },
         },
       });
-      console.log(req.user);
 
       return reserves;
     });
@@ -118,7 +117,7 @@ export class ReserveClassroomService {
 
   async update(id: string, req: Request, body: UpdateReserveClassroomDto) {
     const userId = req.user?.id as string;
-    await validateUser(userId, 'Você só pode atualizar suas reservas');
+    await validateUser(userId);
 
     const dateStart = new Date(body.date_Start);
     const dateEnd = new Date(body.date_End);

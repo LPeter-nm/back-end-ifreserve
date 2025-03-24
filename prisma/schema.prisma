@@ -137,7 +137,6 @@ model Reserve {
   sport Sport?
   classroom Classroom?
   event Event?
-  report Report?
 
   @@index([date_Start, date_End])
   @@index([userId])
@@ -153,9 +152,12 @@ model Sport {
   status StatusSport @default(PENDENTE)
   anseweredBy String?
   comments String?
+  completed Boolean?
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
+
+  report Report?
 
   reserve Reserve @relation(fields: [reserveId], references: [id], onDelete: Cascade)
   reserveId String @unique
@@ -204,8 +206,8 @@ model Report {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
-  reserve Reserve @relation(fields: [reserveId], references: [id], onDelete: Cascade)
-  reserveId String @unique
+  sport Sport @relation(fields: [sportId], references: [id], onDelete: Cascade)
+  sportId String @unique
 }
 
 model Notification {
