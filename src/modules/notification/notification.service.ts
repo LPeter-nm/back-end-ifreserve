@@ -59,4 +59,17 @@ export class NotificationService {
       };
     });
   }
+
+  async removeAll(req: Request) {
+    return this.prisma.$transaction(async (prisma) => {
+      await prisma.notification.deleteMany({
+        where: { userId: req.user?.id as string },
+      });
+
+      return {
+        message: 'Notificações deletadas com sucesso',
+        status: HttpStatus.NO_CONTENT,
+      };
+    });
+  }
 }
