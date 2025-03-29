@@ -17,13 +17,22 @@ import { CheckPolicies } from '../casl/guards/policies.check';
 import { AppAbility } from '../casl/casl-ability.factory/casl-ability.factory';
 import { Action } from '../casl/casl-ability.factory/actionDTO/casl-actionDTO';
 import { Public } from '../auth/skipAuth/skipAuth';
+import { ApiBearerAuth, ApiResponse, ApiTags } from '@nestjs/swagger';
 
+@ApiTags('Reserva - Ofício')
 @UseGuards(PoliciesGuard)
 @Controller('reserve-sport')
 export class ReserveSportController {
   constructor(private readonly reserveSportService: ReserveSportService) {}
 
   @Post('request')
+  @ApiResponse({ status: 200, description: 'Reserva criada com sucesso' })
+  @ApiResponse({ status: 400, description: 'Erro ao criar reserva' })
+  @ApiResponse({ status: 401, description: 'Erro na requisição do usuário' })
+  @ApiResponse({ status: 409, description: 'Erro de conflito de horários' })
+  @ApiResponse({ status: 417, description: 'Datas inválidas' })
+  @ApiResponse({ status: 500, description: 'Erro interno do servidor' })
+  @ApiBearerAuth('access_token')
   @CheckPolicies((ability: AppAbility) => ability.can(Action.User, 'all'))
   @CheckPolicies((ability: AppAbility) => ability.can(Action.Admin, 'all'))
   create(@Body() body: CreateReserveSportDto, @Req() req: Request) {
@@ -31,18 +40,33 @@ export class ReserveSportController {
   }
 
   @Get('reserves')
+  @ApiResponse({ status: 200, description: 'Reservas listadas com sucesso' })
+  @ApiResponse({ status: 400, description: 'Erro ao criar reserva' })
+  @ApiResponse({ status: 500, description: 'Erro interno do servidor' })
+  @ApiBearerAuth('access_token')
   @CheckPolicies((ability: AppAbility) => ability.can(Action.Admin, 'all'))
   findAll() {
     return this.reserveSportService.findAll();
   }
 
   @Get(':id')
+  @ApiResponse({ status: 200, description: 'Reservas listadas com sucesso' })
+  @ApiResponse({ status: 400, description: 'Erro ao criar reserva' })
+  @ApiResponse({ status: 500, description: 'Erro interno do servidor' })
   @Public()
   findOne(@Param('id') id: string) {
     return this.reserveSportService.findOne(id);
   }
 
   @Patch(':id')
+  @ApiResponse({ status: 200, description: 'Reserva atualizada com sucesso' })
+  @ApiResponse({ status: 400, description: 'Erro ao criar reserva' })
+  @ApiResponse({ status: 404, description: 'Reserva não encontrada' })
+  @ApiResponse({ status: 401, description: 'Erro na requisição do usuário' })
+  @ApiResponse({ status: 409, description: 'Erro de conflito de horários' })
+  @ApiResponse({ status: 417, description: 'Datas inválidas' })
+  @ApiResponse({ status: 500, description: 'Erro interno do servidor' })
+  @ApiBearerAuth('access_token')
   @CheckPolicies((ability: AppAbility) => ability.can(Action.Admin, 'all'))
   @CheckPolicies((ability: AppAbility) => ability.can(Action.User, 'all'))
   update(
@@ -54,6 +78,12 @@ export class ReserveSportController {
   }
 
   @Patch(':id/confirmed')
+  @ApiResponse({ status: 200, description: 'Reserva atualizada com sucesso' })
+  @ApiResponse({ status: 400, description: 'Erro ao criar reserva' })
+  @ApiResponse({ status: 404, description: 'Reserva não encontrada' })
+  @ApiResponse({ status: 401, description: 'Erro na requisição do usuário' })
+  @ApiResponse({ status: 500, description: 'Erro interno do servidor' })
+  @ApiBearerAuth('access_token')
   @CheckPolicies((ability: AppAbility) => ability.can(Action.Admin, 'all'))
   confirmed(
     @Req() req: Request,
@@ -64,6 +94,12 @@ export class ReserveSportController {
   }
 
   @Patch(':id/canceled')
+  @ApiResponse({ status: 200, description: 'Reserva atualizada com sucesso' })
+  @ApiResponse({ status: 400, description: 'Erro ao criar reserva' })
+  @ApiResponse({ status: 404, description: 'Reserva não encontrada' })
+  @ApiResponse({ status: 401, description: 'Erro na requisição do usuário' })
+  @ApiResponse({ status: 500, description: 'Erro interno do servidor' })
+  @ApiBearerAuth('access_token')
   @CheckPolicies((ability: AppAbility) => ability.can(Action.Admin, 'all'))
   canceled(
     @Req() req: Request,
@@ -74,6 +110,12 @@ export class ReserveSportController {
   }
 
   @Patch(':id/refused')
+  @ApiResponse({ status: 200, description: 'Reserva atualizada com sucesso' })
+  @ApiResponse({ status: 400, description: 'Erro ao criar reserva' })
+  @ApiResponse({ status: 404, description: 'Reserva não encontrada' })
+  @ApiResponse({ status: 401, description: 'Erro na requisição do usuário' })
+  @ApiResponse({ status: 500, description: 'Erro interno do servidor' })
+  @ApiBearerAuth('access_token')
   @CheckPolicies((ability: AppAbility) => ability.can(Action.Admin, 'all'))
   refused(
     @Req() req: Request,
@@ -84,6 +126,10 @@ export class ReserveSportController {
   }
 
   @Delete(':id')
+  @ApiResponse({ status: 200, description: 'Reserva deletada com sucesso' })
+  @ApiResponse({ status: 400, description: 'Erro ao deletar reserva' })
+  @ApiResponse({ status: 404, description: 'Reserva não encontrada' })
+  @ApiResponse({ status: 500, description: 'Erro interno do servidor' })
   @CheckPolicies((ability: AppAbility) => ability.can(Action.Admin, 'all'))
   remove(@Param('id') id: string) {
     return this.reserveSportService.remove(id);

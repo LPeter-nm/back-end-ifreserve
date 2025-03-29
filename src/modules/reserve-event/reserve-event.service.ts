@@ -12,17 +12,9 @@ export class ReserveEventService {
   constructor(private readonly prisma: PrismaService) {}
 
   async create(body: CreateReserveEventDto, req: Request) {
-    const userId = req.user?.id;
-    const userCheck = await this.prisma.user.findFirst({
-      where: { id: userId },
-    });
+    const userId = req.user?.id as string;
 
-    if (!userCheck) {
-      throw new HttpException(
-        'Usuário necessita estar autenticado para cadastrar reserva',
-        HttpStatus.UNAUTHORIZED,
-      );
-    }
+    await validateUser(userId);
 
     const dateStart = new Date(body.date_Start);
     const dateEnd = new Date(body.date_End);
@@ -45,7 +37,7 @@ export class ReserveEventService {
           date_End: dateEnd,
           hour_Start: body.hour_Start,
           hour_End: body.hour_End,
-          userId: userId as string,
+          userId: userId,
           event: {
             create: {
               name: body.name,
@@ -126,6 +118,16 @@ export class ReserveEventService {
   async update(id: string, req: Request, body: UpdateReserveEventDto) {
     const userId = req.user?.id as string;
     await validateUser(userId, 'Você só pode atualizar suas reservas');
+
+    const reserveFind = await this.prisma.event.findFirst({
+      where: {
+        id,
+      },
+    });
+
+    if (!reserveFind) {
+      throw new HttpException('Reserva não encontrada', HttpStatus.NOT_FOUND);
+    }
 
     const dateStart = new Date(body.date_Start);
     const dateEnd = new Date(body.date_End);

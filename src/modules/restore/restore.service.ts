@@ -107,13 +107,16 @@ export class RestoreService {
       }
 
       if (restore.expirationAt.getTime() < new Date().getTime()) {
-        throw new HttpException(`O token está expirado!`, HttpStatus.NOT_FOUND);
+        throw new HttpException(
+          `O token está expirado!`,
+          HttpStatus.REQUEST_TIMEOUT,
+        );
       }
 
       if (restore.used) {
         throw new HttpException(
           `O token já foi utilizado!`,
-          HttpStatus.BAD_REQUEST,
+          HttpStatus.CONFLICT,
         );
       }
 
@@ -151,12 +154,15 @@ export class RestoreService {
     if (!tokenCheck) {
       throw new HttpException(
         `Token inexistente ou o Token não está associado ao usuário especificado!`,
-        HttpStatus.NOT_FOUND,
+        HttpStatus.EXPECTATION_FAILED,
       );
     }
 
     if (tokenCheck.expirationAt.getTime() < new Date().getTime()) {
-      throw new HttpException(`O token está expirado!`, HttpStatus.NOT_FOUND);
+      throw new HttpException(
+        `O token está expirado!`,
+        HttpStatus.REQUEST_TIMEOUT,
+      );
     }
 
     if (tokenCheck.used !== true) {

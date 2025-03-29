@@ -17,7 +17,9 @@ import { AppAbility } from '../casl/casl-ability.factory/casl-ability.factory';
 import { Action } from '../casl/casl-ability.factory/actionDTO/casl-actionDTO';
 import { Request } from 'express';
 import { UserTypeMiddleware } from './middleware/type-user';
+import { ApiBearerAuth, ApiResponse, ApiTags } from '@nestjs/swagger';
 
+@ApiTags('Usuário')
 @UseGuards(PoliciesGuard)
 @Controller('user')
 export class UserController {
@@ -27,6 +29,15 @@ export class UserController {
   ) {}
 
   @Post('type-user')
+  @ApiResponse({
+    status: 200,
+    description: 'Tipo de usuário selecionado com sucesso',
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Erro ao selecionar tipo de usuário',
+  })
+  @ApiResponse({ status: 500, description: 'Erro interno do servidor' })
   @Public()
   register(@Body() body: CreateUserDto, @Req() req: Request) {
     return this.userSvc.choosingUserType(body, req);
@@ -40,6 +51,15 @@ export class UserController {
   }
 
   @Delete(':id')
+  @ApiResponse({ status: 200, description: 'Usuário deletado com sucesso' })
+  @ApiResponse({ status: 400, description: 'Erro ao deletar usuário' })
+  @ApiResponse({
+    status: 403,
+    description: 'Não é permitido excluir o administrador geral',
+  })
+  @ApiResponse({ status: 404, description: 'Usuário não encontrado' })
+  @ApiResponse({ status: 500, description: 'Erro interno do servidor' })
+  @ApiBearerAuth('access_token')
   @CheckPolicies((ability: AppAbility) => ability.can(Action.General, 'all'))
   delete(@Param('id') id: string) {
     return this.userSvc.delete(id);

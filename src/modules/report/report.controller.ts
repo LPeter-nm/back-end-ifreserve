@@ -83,8 +83,8 @@ export class ReportController {
   @ApiResponse({ status: 500, description: 'Erro interno do servidor' })
   @ApiBearerAuth('access_token')
   @CheckPolicies((ability: AppAbility) => ability.can(Action.User, 'all'))
-  updateStatus(@Param('id') id: string) {
-    return this.reportService.updateStatus(id);
+  updateStatus(@Param('id') id: string, @Body() body: UpdateReportDto) {
+    return this.reportService.updateStatus(id, body);
   }
 
   @Delete(':id')

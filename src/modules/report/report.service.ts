@@ -92,7 +92,7 @@ export class ReportService {
     });
   }
 
-  async updateStatus(id: string) {
+  async updateStatus(id: string, body: UpdateReportDto) {
     const reportFound = await this.prisma.report.findFirst({ where: { id } });
 
     if (!reportFound) {
@@ -103,6 +103,7 @@ export class ReportService {
       const updatedReportStatus = await this.prisma.report.update({
         where: { id },
         data: {
+          comments: body.comments,
           status: true,
         },
       });

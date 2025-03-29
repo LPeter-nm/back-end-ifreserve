@@ -1,9 +1,4 @@
-import {
-  ForbiddenException,
-  HttpException,
-  HttpStatus,
-  Injectable,
-} from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import {
   CreateUserInternalDto,
   UpdateUserInternalDto,
@@ -12,6 +7,8 @@ import { PrismaService } from 'src/database/PrismaService';
 import { randomInt } from 'node:crypto';
 import * as bcrypt from 'bcryptjs';
 import { Request } from 'express';
+import { handleAsyncOperation } from 'src/validations/prismaValidate';
+import { validateUser } from 'src/validations/authValidate';
 
 @Injectable()
 export class UserInternalService {
@@ -46,7 +43,8 @@ export class UserInternalService {
         'Usuário interno já registrado',
         HttpStatus.CONFLICT,
       );
-    try {
+
+    return handleAsyncOperation(async () => {
       const isAluno = /^\d{5}[A-Z]{3}\.[A-Z]{3}\d{4}$/.test(body.registration);
       const isServer = /^\d{4,10}$/.test(body.registration);
       if (!body.email.includes('@acad.ifma.edu.br'))
@@ -96,7 +94,6 @@ export class UserInternalService {
             },
           },
           createdAt: true,
-          updatedAt: true,
         },
       });
 
@@ -114,16 +111,11 @@ export class UserInternalService {
         };
       }
       return registerInt;
-    } catch (error) {
-      return {
-        message: 'Erro ao registrar usuário interno',
-        error: error,
-      };
-    }
+    });
   }
 
   async findAll() {
-    try {
+    return handleAsyncOperation(async () => {
       const users = await this.prisma.user_Internal.findMany({
         select: {
           id: true,
@@ -140,16 +132,15 @@ export class UserInternalService {
         },
       });
       return users;
-    } catch (error) {
-      return {
-        message: 'Erro ao listar usuários internos',
-        error: error,
-      };
-    }
+    });
   }
 
   async findOne(req: Request) {
-    try {
+    const userId = req.user?.id as string;
+
+    await validateUser(userId);
+
+    return handleAsyncOperation(async () => {
       const usrInternal = await this.prisma.user_Internal.findFirst({
         where: {
           userId: req.user?.id,
@@ -170,26 +161,13 @@ export class UserInternalService {
       });
 
       return usrInternal;
-    } catch (error) {
-      return {
-        message: 'Erro ao listar usuário interno',
-        error: error,
-      };
-    }
+    });
   }
 
   async update(body: UpdateUserInternalDto, req: Request) {
-    const userId = req.user?.id;
+    const userId = req.user?.id as string;
 
-    const usrCheck = await this.prisma.user_Internal.findUnique({
-      where: { userId },
-    });
-
-    if (!usrCheck)
-      throw new HttpException(
-        'Usuário não encontrado no token fornecido',
-        HttpStatus.NOT_FOUND,
-      );
+    await validateUser(userId);
 
     const randomPass = randomInt(10, 16);
     const hashedPassword = await bcrypt.hash(
@@ -197,7 +175,7 @@ export class UserInternalService {
       randomPass,
     );
 
-    try {
+    return handleAsyncOperation(async () => {
       const usrUpdated = await this.prisma.user.update({
         where: { id: userId },
         data: {
@@ -207,12 +185,7 @@ export class UserInternalService {
       });
 
       return usrUpdated;
-    } catch (error) {
-      return {
-        message: 'Erro ao atualizar usuário interno',
-        error: error,
-      };
-    }
+    });
   }
 
   async delete(req: Request) {

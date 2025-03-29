@@ -12,6 +12,8 @@ import { PrismaService } from 'src/database/PrismaService';
 import * as bcrypt from 'bcryptjs';
 import { randomInt } from 'crypto';
 import { Request } from 'express';
+import { handleAsyncOperation } from 'src/validations/prismaValidate';
+import { validateUser } from 'src/validations/authValidate';
 
 @Injectable()
 export class UserExternalService {
@@ -31,7 +33,7 @@ export class UserExternalService {
     if (cpfRegistered)
       throw new HttpException(
         'CPF já cadastrado no sistema',
-        HttpStatus.BAD_REQUEST,
+        HttpStatus.CONFLICT,
       );
 
     if (body.password.length < 8) {
@@ -41,7 +43,7 @@ export class UserExternalService {
       );
     }
 
-    try {
+    return handleAsyncOperation(async () => {
       const randomPass = randomInt(10, 16);
       const hashedPassword = await bcrypt.hash(body.password, randomPass);
 
@@ -52,7 +54,6 @@ export class UserExternalService {
         );
 
       if (typeUser === 'ALUNO' || typeUser === 'SERVIDOR') {
-        // Garantindo que só usuários externos possam se registrar
         throw new HttpException(
           'Rota somente para usuários externos ao Intituto',
           HttpStatus.FORBIDDEN,
@@ -86,18 +87,15 @@ export class UserExternalService {
             },
           },
           createdAt: true,
-          updatedAt: true,
         },
       });
 
       return registerExternal;
-    } catch (error) {
-      throw new HttpException(error as string, HttpStatus.BAD_REQUEST);
-    }
+    });
   }
 
   async findAll() {
-    try {
+    return handleAsyncOperation(async () => {
       const users = await this.prisma.user_External.findMany({
         select: {
           user: {
@@ -116,15 +114,17 @@ export class UserExternalService {
       });
 
       return users;
-    } catch (error) {
-      throw new HttpException(error as string, HttpStatus.BAD_REQUEST);
-    }
+    });
   }
 
   async findOne(req: Request) {
-    try {
+    const userId = req.user?.id as string;
+
+    await validateUser(userId);
+
+    return handleAsyncOperation(async () => {
       const usrExternal = await this.prisma.user_External.findFirst({
-        where: { userId: req.user?.id },
+        where: { userId },
         select: {
           id: true,
           user: {
@@ -146,19 +146,13 @@ export class UserExternalService {
         throw new HttpException('Usuário não encontrado', HttpStatus.NOT_FOUND);
 
       return usrExternal;
-    } catch (error) {
-      throw new HttpException(error as string, HttpStatus.BAD_REQUEST);
-    }
+    });
   }
 
   async update(req: Request, body: UpdateUserExternalDto) {
-    const userId = req.user?.id;
+    const userId = req.user?.id as string;
 
-    const usr = await this.prisma.user_External.findUnique({
-      where: { userId: userId },
-    });
-    if (!usr)
-      throw new HttpException('Usuário não encontrado', HttpStatus.NOT_FOUND);
+    await validateUser(userId);
 
     const randomPass = randomInt(10, 16);
     const hashedPassword = await bcrypt.hash(
@@ -166,7 +160,7 @@ export class UserExternalService {
       randomPass,
     );
 
-    try {
+    return handleAsyncOperation(async () => {
       const usrUpdated = await this.prisma.user.update({
         where: { id: userId },
         data: {
@@ -194,21 +188,14 @@ export class UserExternalService {
       });
 
       return usrUpdated;
-    } catch (error) {
-      throw new HttpException(error as string, HttpStatus.BAD_REQUEST);
-    }
+    });
   }
 
   async delete(req: Request) {
     return this.prisma.$transaction(async (prisma) => {
-      const userId = req.user?.id;
+      const userId = req.user?.id as string;
 
-      const userCheck = await prisma.user_External.findUnique({
-        where: { userId },
-      });
-      if (!userCheck) {
-        throw new HttpException('Usuário não encontrado', HttpStatus.NOT_FOUND);
-      }
+      await validateUser(userId);
 
       await prisma.user.update({
         where: { id: userId },
