@@ -32,7 +32,6 @@ CREATE TABLE "User" (
     "role" "Role" NOT NULL DEFAULT 'USER',
     "status" "StatusUser" DEFAULT 'ATIVO',
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updated_at" TIMESTAMP(3) NOT NULL,
 
     CONSTRAINT "User_pkey" PRIMARY KEY ("id")
 );
@@ -62,16 +61,15 @@ CREATE TABLE "User_External" (
 );
 
 -- CreateTable
-CREATE TABLE "Restore" (
+CREATE TABLE "restores" (
     "id" TEXT NOT NULL,
+    "userId" TEXT NOT NULL,
     "token" TEXT NOT NULL,
-    "status" "StatusRestore" NOT NULL DEFAULT 'PENDENTE',
-    "expiration" TIMESTAMP(3) NOT NULL,
+    "used" BOOLEAN NOT NULL DEFAULT false,
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP(3) NOT NULL,
-    "userId" TEXT NOT NULL,
 
-    CONSTRAINT "Restore_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "restores_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -84,7 +82,6 @@ CREATE TABLE "Reserve" (
     "hour_Start" TEXT NOT NULL,
     "hour_End" TEXT NOT NULL,
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updated_at" TIMESTAMP(3) NOT NULL,
     "userId" TEXT NOT NULL,
 
     CONSTRAINT "Reserve_pkey" PRIMARY KEY ("id")
@@ -100,6 +97,7 @@ CREATE TABLE "Sport" (
     "status" "StatusSport" NOT NULL DEFAULT 'PENDENTE',
     "anseweredBy" TEXT,
     "comments" TEXT,
+    "completed" BOOLEAN,
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP(3) NOT NULL,
     "reserveId" TEXT NOT NULL,
@@ -147,7 +145,7 @@ CREATE TABLE "Report" (
     "status" BOOLEAN NOT NULL DEFAULT false,
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP(3) NOT NULL,
-    "reserveId" TEXT NOT NULL,
+    "sportId" TEXT NOT NULL,
 
     CONSTRAINT "Report_pkey" PRIMARY KEY ("id")
 );
@@ -156,10 +154,9 @@ CREATE TABLE "Report" (
 CREATE TABLE "Notification" (
     "id" TEXT NOT NULL,
     "message" TEXT NOT NULL,
-    "read" BOOLEAN NOT NULL DEFAULT false,
+    "description" TEXT NOT NULL,
     "userId" TEXT NOT NULL,
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updated_at" TIMESTAMP(3) NOT NULL,
 
     CONSTRAINT "Notification_pkey" PRIMARY KEY ("id")
 );
@@ -186,12 +183,6 @@ CREATE UNIQUE INDEX "User_External_cpf_key" ON "User_External"("cpf");
 CREATE UNIQUE INDEX "User_External_userId_key" ON "User_External"("userId");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "Restore_userId_key" ON "Restore"("userId");
-
--- CreateIndex
-CREATE INDEX "Restore_token_idx" ON "Restore"("token");
-
--- CreateIndex
 CREATE UNIQUE INDEX "Reserve_userId_key" ON "Reserve"("userId");
 
 -- CreateIndex
@@ -210,7 +201,7 @@ CREATE UNIQUE INDEX "Classroom_reserveId_key" ON "Classroom"("reserveId");
 CREATE UNIQUE INDEX "Event_reserveId_key" ON "Event"("reserveId");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "Report_reserveId_key" ON "Report"("reserveId");
+CREATE UNIQUE INDEX "Report_sportId_key" ON "Report"("sportId");
 
 -- AddForeignKey
 ALTER TABLE "User_Internal" ADD CONSTRAINT "User_Internal_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
@@ -219,7 +210,7 @@ ALTER TABLE "User_Internal" ADD CONSTRAINT "User_Internal_userId_fkey" FOREIGN K
 ALTER TABLE "User_External" ADD CONSTRAINT "User_External_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Restore" ADD CONSTRAINT "Restore_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "restores" ADD CONSTRAINT "restores_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Reserve" ADD CONSTRAINT "Reserve_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
@@ -234,7 +225,7 @@ ALTER TABLE "Classroom" ADD CONSTRAINT "Classroom_reserveId_fkey" FOREIGN KEY ("
 ALTER TABLE "Event" ADD CONSTRAINT "Event_reserveId_fkey" FOREIGN KEY ("reserveId") REFERENCES "Reserve"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Report" ADD CONSTRAINT "Report_reserveId_fkey" FOREIGN KEY ("reserveId") REFERENCES "Reserve"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "Report" ADD CONSTRAINT "Report_sportId_fkey" FOREIGN KEY ("sportId") REFERENCES "Sport"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Notification" ADD CONSTRAINT "Notification_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
