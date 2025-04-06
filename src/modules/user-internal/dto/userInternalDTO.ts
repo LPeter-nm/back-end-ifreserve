@@ -1,7 +1,18 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsNotEmpty, Length } from 'class-validator';
 
+export enum Function {
+  PROFESSOR = 'PROFESSOR', 
+  PROFESSOR_ED_FISICA = 'PROFESSOR_ED_FISICA'
+}
 export class CreateUserInternalDto {
+  @ApiProperty({
+    example: 'PROFESSOR',
+    description: 'Verificação se o servidor é professor de educação física',
+  })
+  functionServer?: Function;
+
+
   @ApiProperty({
     example: 'Fulano name',
     description: 'Nome do usuário interno',

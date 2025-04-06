@@ -21,7 +21,6 @@ export class NotificationController {
   @ApiResponse({ status: 400, description: 'Erro ao listar notificações' })
   @ApiResponse({ status: 500, description: 'Erro interno do servidor' })
   @ApiBearerAuth('access_token')
-  @CheckPolicies((ability: AppAbility) => ability.can(Action.Admin, 'all'))
   @CheckPolicies((ability: AppAbility) => ability.can(Action.User, 'all'))
   findAll(@Req() req: Request) {
     return this.notificationService.findAll(req);
@@ -36,7 +35,6 @@ export class NotificationController {
   @ApiResponse({ status: 404, description: 'Notificação não encontrada' })
   @ApiResponse({ status: 500, description: 'Erro interno do servidor' })
   @ApiBearerAuth('access_token')
-  @CheckPolicies((ability: AppAbility) => ability.can(Action.Admin, 'all'))
   @CheckPolicies((ability: AppAbility) => ability.can(Action.User, 'all'))
   remove(@Param('id') id: string) {
     return this.notificationService.remove(id);
@@ -50,7 +48,6 @@ export class NotificationController {
   @ApiResponse({ status: 400, description: 'Erro ao deletar notificação' })
   @ApiResponse({ status: 500, description: 'Erro interno do servidor' })
   @ApiBearerAuth('access_token')
-  @CheckPolicies((ability: AppAbility) => ability.can(Action.Admin, 'all'))
   @CheckPolicies((ability: AppAbility) => ability.can(Action.User, 'all'))
   removeAll(req: Request) {
     return this.notificationService.removeAll(req);
