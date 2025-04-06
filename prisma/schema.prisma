@@ -54,6 +54,11 @@ enum Ocurrence {
   SEMANALMENTE
 }
 
+enum FunctionServer {
+  PROFESSOR
+  PROFESSOR_ED_FISICA
+}
+
 // Tabela usuário
 model User {
   id String @id @default(uuid())
@@ -80,6 +85,7 @@ model User {
 model User_Internal {
   id String @id @default(uuid())
   registration String @unique
+  functionServer FunctionServer? @default(PROFESSOR)
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
