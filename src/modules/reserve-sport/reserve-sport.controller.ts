@@ -10,7 +10,7 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { ReserveSportService } from './reserve-sport.service';
-import { CreateReserveSportDto, UpdateReserveSportDto } from './dto/sportDto';
+import { CreateReserveSportDto, PutCommentsDto, UpdateReserveSportDto } from './dto/sportDto';
 import { Request } from 'express';
 import { PoliciesGuard } from '../casl/guards/policies.guard';
 import { CheckPolicies } from '../casl/guards/policies.check';
@@ -88,7 +88,7 @@ export class ReserveSportController {
   confirmed(
     @Req() req: Request,
     @Param('id') id: string,
-    @Body() body: UpdateReserveSportDto,
+    @Body() body: PutCommentsDto,
   ) {
     return this.reserveSportService.updateConfirmed(req, id, body);
   }
@@ -104,7 +104,7 @@ export class ReserveSportController {
   canceled(
     @Req() req: Request,
     @Param('id') id: string,
-    @Body() body: UpdateReserveSportDto,
+    @Body() body: PutCommentsDto,
   ) {
     return this.reserveSportService.updateCanceled(req, id, body);
   }
@@ -120,7 +120,7 @@ export class ReserveSportController {
   refused(
     @Req() req: Request,
     @Param('id') id: string,
-    @Body() body: UpdateReserveSportDto,
+    @Body() body: PutCommentsDto,
   ) {
     return this.reserveSportService.updateRefused(req, id, body);
   }

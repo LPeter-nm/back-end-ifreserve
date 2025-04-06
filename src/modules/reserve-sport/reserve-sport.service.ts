@@ -1,5 +1,5 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
-import { CreateReserveSportDto, UpdateReserveSportDto } from './dto/sportDto';
+import { CreateReserveSportDto, PutCommentsDto, UpdateReserveSportDto } from './dto/sportDto';
 import { PrismaService } from 'src/database/PrismaService';
 import { Request } from 'express';
 import { handleAsyncOperation } from 'src/validations/prismaValidate';
@@ -230,7 +230,7 @@ export class ReserveSportService {
     });
   }
 
-  async updateConfirmed(req: Request, id: string, body: UpdateReserveSportDto) {
+  async updateConfirmed(req: Request, id: string, body: PutCommentsDto) {
     const reserve = await this.prisma.sport.findFirst({ where: { id } });
 
     if (!reserve) {
@@ -275,7 +275,7 @@ export class ReserveSportService {
     });
   }
 
-  async updateCanceled(req: Request, id: string, body: UpdateReserveSportDto) {
+  async updateCanceled(req: Request, id: string, body: PutCommentsDto) {
     const reserve = await this.prisma.sport.findFirst({ where: { id } });
 
     if (!reserve) {
@@ -320,7 +320,7 @@ export class ReserveSportService {
     });
   }
 
-  async updateRefused(req: Request, id: string, body: UpdateReserveSportDto) {
+  async updateRefused(req: Request, id: string, body: PutCommentsDto) {
     const reserve = await this.prisma.sport.findFirst({ where: { id } });
 
     if (!reserve) {

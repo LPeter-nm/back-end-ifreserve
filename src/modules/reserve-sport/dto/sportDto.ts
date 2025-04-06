@@ -117,6 +117,10 @@ export class UpdateReserveSportDto {
   })
   type_Practice?: TypePractice;
 
+ 
+}
+
+export class PutCommentsDto {
   @ApiProperty({
     example: 'Sua reserva foi cancelada/recusada por [motivos]',
     description:
