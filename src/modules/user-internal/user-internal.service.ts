@@ -79,7 +79,7 @@ export class UserInternalService {
           userInternal: {
             create: {
               registration: body.registration,
-              functionServer: body.functionServer
+              function_Internal: body.functionInternal,
             },
           },
         },
@@ -98,7 +98,12 @@ export class UserInternalService {
         },
       });
 
-      if (!isAluno && typeUser === 'SERVIDOR' && isServer && body.functionServer === 'PROFESSOR_ED_FISICA') {
+      if (
+        !isAluno &&
+        typeUser === 'SERVIDOR' &&
+        isServer &&
+        body.functionInternal === 'PROFESSOR_ED_FISICA'
+      ) {
         await this.prisma.user.update({
           where: { id: registerInt.id },
           data: {
