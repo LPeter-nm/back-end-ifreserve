@@ -1,5 +1,4 @@
 import {
-  ForbiddenException,
   HttpException,
   HttpStatus,
   Injectable,
@@ -19,16 +18,9 @@ import { validateUser } from 'src/validations/authValidate';
 export class UserExternalService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async registerExternal(body: CreateUserExternalDto, req: Request) {
-    const typeUser = req.session.userType;
-    if (!typeUser)
-      throw new HttpException(
-        'É necessário escolher seu tipo de usuário',
-        HttpStatus.EXPECTATION_FAILED,
-      );
-
-    const cpfRegistered = await this.prisma.user_External.findUnique({
-      where: { cpf: body.cpf },
+  async registerExternal(body: CreateUserExternalDto) {
+    const cpfRegistered = await this.prisma.user.findUnique({
+      where: { identification: body.cpf },
     });
     if (cpfRegistered)
       throw new HttpException(
@@ -53,21 +45,15 @@ export class UserExternalService {
           HttpStatus.BAD_REQUEST,
         );
 
-      if (typeUser === 'ALUNO' || typeUser === 'SERVIDOR') {
-        throw new HttpException(
-          'Rota somente para usuários externos ao Intituto',
-          HttpStatus.FORBIDDEN,
-        );
-      }
       const registerExternal = await this.prisma.user.create({
         data: {
           name: body.name,
           email: body.email,
+          identification: body.cpf,
           password: hashedPassword,
-          type_User: typeUser,
+          type_User: 'EXTERNO',
           userExternal: {
             create: {
-              cpf: body.cpf,
               phone: body.phone,
               address: body.address,
             },
@@ -76,12 +62,12 @@ export class UserExternalService {
         select: {
           id: true,
           name: true,
+          identification: true,
           email: true,
           password: true,
           status: true,
           userExternal: {
             select: {
-              cpf: true,
               phone: true,
               address: true,
             },
@@ -102,12 +88,12 @@ export class UserExternalService {
             select: {
               id: true,
               name: true,
+              identification: true,
               email: true,
               status: true,
               role: true,
             },
           },
-          cpf: true,
           phone: true,
           address: true,
         },
@@ -131,11 +117,11 @@ export class UserExternalService {
             select: {
               name: true,
               email: true,
+              identification: true,
               password: true,
               status: true,
             },
           },
-          cpf: true,
           phone: true,
           address: true,
           userId: true,

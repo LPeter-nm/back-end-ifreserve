@@ -44,8 +44,8 @@ export class UserExternalController {
   @ApiResponse({ status: 409, description: 'Usuário já cadastrado' })
   @ApiResponse({ status: 417, description: 'Erro inesperado' })
   @ApiResponse({ status: 500, description: 'Erro interno do servidor' })
-  create(@Body() body: CreateUserExternalDto, @Req() req: Request) {
-    return this.userExternalService.registerExternal(body, req);
+  create(@Body() body: CreateUserExternalDto) {
+    return this.userExternalService.registerExternal(body);
   }
 
   @Get('users')

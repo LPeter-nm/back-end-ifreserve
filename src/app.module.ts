@@ -1,4 +1,4 @@
-import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
+import {  Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { ScheduleModule } from '@nestjs/schedule';
 
@@ -7,10 +7,7 @@ import { APP_GUARD } from '@nestjs/core';
 import { AuthGuard } from './modules/auth/auth.guard';
 import { CaslModule } from './modules/casl/casl.module';
 import { AuthModule } from './modules/auth/auth.module';
-import { UserInternalModule } from './modules/user-internal/user-internal.module';
 import { PrismaService } from './database/PrismaService';
-import { UserTypeMiddleware } from './modules/user/middleware/type-user';
-import { UserController } from './modules/user/user.controller';
 import { UserExternalModule } from './modules/user-external/user-external.module';
 import { ReserveSportModule } from './modules/reserve-sport/reserve-sport.module';
 import { ReserveModule } from './modules/reserve/reserve.module';
@@ -28,7 +25,6 @@ import { NotificationModule } from './modules/notification/notification.module';
     }),
     ScheduleModule.forRoot(),
     UserModule,
-    UserInternalModule,
     UserExternalModule,
     CaslModule,
     AuthModule,
@@ -50,8 +46,4 @@ import { NotificationModule } from './modules/notification/notification.module';
   ],
   controllers: [],
 })
-export class AppModule implements NestModule {
-  configure(consumer: MiddlewareConsumer) {
-    consumer.apply(UserTypeMiddleware).forRoutes(UserController);
-  }
-}
+export class AppModule{}

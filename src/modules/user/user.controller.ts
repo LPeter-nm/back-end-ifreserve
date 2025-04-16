@@ -1,22 +1,16 @@
 import {
-  Body,
   Controller,
   Delete,
   Get,
   Param,
-  Post,
-  Req,
   UseGuards,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { PoliciesGuard } from '../casl/guards/policies.guard';
 import { Public } from '../auth/skipAuth/skipAuth';
-import { CreateUserDto } from './dto/userDto';
 import { CheckPolicies } from '../casl/guards/policies.check';
 import { AppAbility } from '../casl/casl-ability.factory/casl-ability.factory';
 import { Action } from '../casl/casl-ability.factory/actionDTO/casl-actionDTO';
-import { Request } from 'express';
-import { UserTypeMiddleware } from './middleware/type-user';
 import { ApiBearerAuth, ApiResponse, ApiTags } from '@nestjs/swagger';
 
 @ApiTags('Usuário')
@@ -25,23 +19,8 @@ import { ApiBearerAuth, ApiResponse, ApiTags } from '@nestjs/swagger';
 export class UserController {
   constructor(
     private readonly userSvc: UserService,
-    private readonly mid: UserTypeMiddleware,
   ) {}
 
-  @Post('type-user')
-  @ApiResponse({
-    status: 200,
-    description: 'Tipo de usuário selecionado com sucesso',
-  })
-  @ApiResponse({
-    status: 400,
-    description: 'Erro ao selecionar tipo de usuário',
-  })
-  @ApiResponse({ status: 500, description: 'Erro interno do servidor' })
-  @Public()
-  register(@Body() body: CreateUserDto, @Req() req: Request) {
-    return this.userSvc.choosingUserType(body, req);
-  }
 
   // Lembrar que é para apagar após termino de teste e do site em si
   @Get()

@@ -12,11 +12,3 @@ export enum Type_User {
   EXTERNO = 'EXTERNO',
 }
 
-export class CreateUserDto {
-  @ApiProperty({
-    example: 'ALUNO',
-    description: 'Tipo de usuário (Aluno, externo ou servidor)',
-  })
-  @IsNotEmpty()
-  type_User: Type_User;
-}

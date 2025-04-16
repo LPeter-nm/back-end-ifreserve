@@ -22,6 +22,7 @@ async function createGeneral() {
     const password = 'passexample';
     const name = 'Administrador geral';
     const registration = '000000';
+    const functionServer = 'Função do servidor admin geral'
 
     const randomSalt = randomInt(10, 16);
     const hashedPassword = await bcrypt.hash(password, randomSalt);
@@ -29,13 +30,15 @@ async function createGeneral() {
     const generalAdmin = await prisma.user.create({
       data: {
         name,
+        identification: registration,
         email: general,
         password: hashedPassword,
         type_User: 'SERVIDOR',
         role: 'GENERAL',
-        userInternal: {
+        server: {
           create: {
-            registration,
+            funtion_Server: functionServer
+            
           },
         },
       },

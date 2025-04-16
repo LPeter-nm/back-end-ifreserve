@@ -4,22 +4,12 @@ import {
   HttpStatus,
   Injectable,
 } from '@nestjs/common';
-import { CreateUserDto } from './dto/userDto';
 import { PrismaService } from 'src/database/PrismaService';
-import { Request } from 'express';
-import { handleAsyncOperation } from 'src/validations/prismaValidate';
+
 
 @Injectable()
 export class UserService {
   constructor(private readonly prisma: PrismaService) {}
-
-  async choosingUserType(body: CreateUserDto, req: Request) {
-    return handleAsyncOperation(async () => {
-      return {
-        message: `Tipo de usuário: ${req.session.userType}`,
-      };
-    });
-  }
 
   // ficará só para meus testes (lembrar de apagar após termino)
   async findAll() {
