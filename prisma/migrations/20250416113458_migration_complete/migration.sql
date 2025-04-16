@@ -26,6 +26,7 @@ CREATE TYPE "Ocurrence" AS ENUM ('EVENTO_UNICO', 'SEMANALMENTE');
 CREATE TABLE "User" (
     "id" TEXT NOT NULL,
     "name" TEXT NOT NULL,
+    "identification" TEXT NOT NULL,
     "email" TEXT NOT NULL,
     "password" TEXT NOT NULL,
     "type_User" "Type_User" NOT NULL DEFAULT 'ALUNO',
@@ -37,14 +38,24 @@ CREATE TABLE "User" (
 );
 
 -- CreateTable
-CREATE TABLE "User_Internal" (
+CREATE TABLE "Server" (
     "id" TEXT NOT NULL,
-    "registration" TEXT NOT NULL,
+    "funtion_Server" TEXT NOT NULL,
+    "userId" TEXT NOT NULL,
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP(3) NOT NULL,
-    "userId" TEXT NOT NULL,
 
-    CONSTRAINT "User_Internal_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "Server_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "Student" (
+    "id" TEXT NOT NULL,
+    "userId" TEXT NOT NULL,
+    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updated_at" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "Student_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -53,9 +64,9 @@ CREATE TABLE "User_External" (
     "cpf" TEXT NOT NULL,
     "phone" TEXT,
     "address" TEXT,
+    "userId" TEXT NOT NULL,
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP(3) NOT NULL,
-    "userId" TEXT NOT NULL,
 
     CONSTRAINT "User_External_pkey" PRIMARY KEY ("id")
 );
@@ -81,8 +92,8 @@ CREATE TABLE "Reserve" (
     "date_End" TIMESTAMP(3) NOT NULL,
     "hour_Start" TEXT NOT NULL,
     "hour_End" TEXT NOT NULL,
-    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "userId" TEXT NOT NULL,
+    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT "Reserve_pkey" PRIMARY KEY ("id")
 );
@@ -98,9 +109,9 @@ CREATE TABLE "Sport" (
     "anseweredBy" TEXT,
     "comments" TEXT,
     "completed" BOOLEAN,
+    "reserveId" TEXT NOT NULL,
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP(3) NOT NULL,
-    "reserveId" TEXT NOT NULL,
 
     CONSTRAINT "Sport_pkey" PRIMARY KEY ("id")
 );
@@ -110,9 +121,9 @@ CREATE TABLE "Classroom" (
     "id" TEXT NOT NULL,
     "course" TEXT NOT NULL,
     "matter" TEXT NOT NULL,
+    "reserveId" TEXT NOT NULL,
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP(3) NOT NULL,
-    "reserveId" TEXT NOT NULL,
 
     CONSTRAINT "Classroom_pkey" PRIMARY KEY ("id")
 );
@@ -123,9 +134,9 @@ CREATE TABLE "Event" (
     "name" TEXT NOT NULL,
     "description" TEXT NOT NULL,
     "location" TEXT NOT NULL,
+    "reserveId" TEXT NOT NULL,
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP(3) NOT NULL,
-    "reserveId" TEXT NOT NULL,
 
     CONSTRAINT "Event_pkey" PRIMARY KEY ("id")
 );
@@ -143,9 +154,9 @@ CREATE TABLE "Report" (
     "description" TEXT,
     "comments" TEXT,
     "status" BOOLEAN NOT NULL DEFAULT false,
+    "sportId" TEXT NOT NULL,
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP(3) NOT NULL,
-    "sportId" TEXT NOT NULL,
 
     CONSTRAINT "Report_pkey" PRIMARY KEY ("id")
 );
@@ -162,6 +173,9 @@ CREATE TABLE "Notification" (
 );
 
 -- CreateIndex
+CREATE UNIQUE INDEX "User_identification_key" ON "User"("identification");
+
+-- CreateIndex
 CREATE UNIQUE INDEX "User_email_key" ON "User"("email");
 
 -- CreateIndex
@@ -171,10 +185,10 @@ CREATE INDEX "User_email_idx" ON "User"("email");
 CREATE INDEX "User_created_at_idx" ON "User"("created_at");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "User_Internal_registration_key" ON "User_Internal"("registration");
+CREATE UNIQUE INDEX "Server_userId_key" ON "Server"("userId");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "User_Internal_userId_key" ON "User_Internal"("userId");
+CREATE UNIQUE INDEX "Student_userId_key" ON "Student"("userId");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "User_External_cpf_key" ON "User_External"("cpf");
@@ -204,7 +218,10 @@ CREATE UNIQUE INDEX "Event_reserveId_key" ON "Event"("reserveId");
 CREATE UNIQUE INDEX "Report_sportId_key" ON "Report"("sportId");
 
 -- AddForeignKey
-ALTER TABLE "User_Internal" ADD CONSTRAINT "User_Internal_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "Server" ADD CONSTRAINT "Server_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Student" ADD CONSTRAINT "Student_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "User_External" ADD CONSTRAINT "User_External_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;

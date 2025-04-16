@@ -54,16 +54,12 @@ enum Ocurrence {
   SEMANALMENTE
 }
 
-enum FunctionInternal {
-  ALUNO
-  PROFESSOR
-  PROFESSOR_ED_FISICA
-}
 
 // Tabela usuário
 model User {
   id String @id @default(uuid())
   name String
+  identification String @unique
   email String @unique
   password String
   type_User Type_User @default(ALUNO)
@@ -72,7 +68,8 @@ model User {
   createdAt DateTime @default(now()) @map("created_at")
 
   // Relacionamentos
-  userInternal User_Internal?
+  server Server?
+  student Student?
   userExternal User_External?
   notifications Notification[]
   restores Restore[]
@@ -83,32 +80,39 @@ model User {
 }
 
 // Tabela usuário interno 
-model User_Internal {
+model Server {
   id String @id @default(uuid())
-  registration String @unique
-  function_Internal FunctionInternal? @default(ALUNO)
+  funtion_Server String
+  userId String @unique @map("userId")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+}
+
+model Student {
+  id String @id @default(uuid())
+  userId String @unique @map("userId")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
-  // Atributos de Relacionamento (especialização)
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId String @unique @map("userId")
 }
 
 // Tabela usuário externo
 model User_External {
   id String @id @default(uuid())
-  cpf String @unique
   phone String?
   address String?
+  userId String @unique
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
-
-  // Atributos de Relacionamento (especialização)
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId String @unique
 }
 
 // Tabela restauração de senha
@@ -124,7 +128,6 @@ model Restore {
   @@map("restores")
 }
 
-// Tabela de reserva 
 model Reserve {
   id String @id @default(uuid())
   type_Reserve Type_Reserve @default(OFICIO)
@@ -133,11 +136,10 @@ model Reserve {
   date_End DateTime
   hour_Start String
   hour_End String
+  userId String @unique
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   createdAt DateTime @default(now()) @map("created_at")
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId String @unique
 
   sport Sport?
   classroom Classroom?
@@ -147,7 +149,6 @@ model Reserve {
   @@index([userId])
 }
 
-// Tabela de reserva da quadra para ofício
 model Sport {
   id String @id @default(uuid())
   type_Practice Type_Practice 
@@ -159,40 +160,38 @@ model Sport {
   comments String?
   completed Boolean?
 
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
-
-  report Report?
-
   reserve Reserve @relation(fields: [reserveId], references: [id], onDelete: Cascade)
   reserveId String @unique
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  
+  report Report?
 }
 
-// Tabela de reserva da quadra para aulas de Ed. Física
 model Classroom {
   id String @id @default(uuid())
   course String
   matter String
-
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
+  reserveId String @unique
 
   reserve Reserve @relation(fields: [reserveId], references: [id], onDelete: Cascade)
-  reserveId String @unique
+  
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
 }
 
-// Tabela de reserva da quadra para eventos ou eventos fora da quadra
 model Event {
   id String @id @default(uuid())
   name String
   description String
   location String
-
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
+  reserveId String @unique
 
   reserve Reserve @relation(fields: [reserveId], references: [id], onDelete: Cascade)
-  reserveId String @unique
+  
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
 }
 
 model Report {
@@ -207,12 +206,13 @@ model Report {
   description String?
   comments String?
   status Boolean @default(false)
+  sportId String @unique
 
+  sport Sport @relation(fields: [sportId], references: [id], onDelete: Cascade)
+  
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
-  sport Sport @relation(fields: [sportId], references: [id], onDelete: Cascade)
-  sportId String @unique
 }
 
 model Notification {
@@ -220,6 +220,8 @@ model Notification {
   message String
   description String
   userId String
+  
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
   createdAt DateTime @default(now()) @map("created_at")
 }
