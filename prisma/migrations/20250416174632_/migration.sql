@@ -61,7 +61,6 @@ CREATE TABLE "Student" (
 -- CreateTable
 CREATE TABLE "User_External" (
     "id" TEXT NOT NULL,
-    "cpf" TEXT NOT NULL,
     "phone" TEXT,
     "address" TEXT,
     "userId" TEXT NOT NULL,
@@ -189,9 +188,6 @@ CREATE UNIQUE INDEX "Server_userId_key" ON "Server"("userId");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "Student_userId_key" ON "Student"("userId");
-
--- CreateIndex
-CREATE UNIQUE INDEX "User_External_cpf_key" ON "User_External"("cpf");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "User_External_userId_key" ON "User_External"("userId");

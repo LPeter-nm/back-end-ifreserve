@@ -9,14 +9,13 @@ dotenv.config();
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
-
   app.use(express.json());
   app.use(express.urlencoded({ extended: true }));
   app.enableCors({
     origin: 'http://localhost:3000',
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
     allowedHeaders: 'Content-Type, Accept, Authorization',
-    credentials: true
+    credentials: true,
   });
 
   const config = new DocumentBuilder()
@@ -37,7 +36,8 @@ async function bootstrap() {
 
     .addTag('Login')
     .addTag('Usuário')
-    .addTag('Usuário Interno')
+    .addTag('Aluno')
+    .addTag('Servidor')
     .addTag('Usuário Externo')
     .addTag('Reserva')
     .addTag('Reserva')

@@ -1,5 +1,9 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
-import { CreateReserveSportDto, PutCommentsDto, UpdateReserveSportDto } from './dto/sportDto';
+import {
+  CreateReserveSportDto,
+  PutCommentsDto,
+  UpdateReserveSportDto,
+} from './dto/sportDto';
 import { PrismaService } from 'src/database/PrismaService';
 import { Request } from 'express';
 import { handleAsyncOperation } from 'src/validations/prismaValidate';
@@ -258,7 +262,14 @@ export class ReserveSportService {
         include: {
           reserve: {
             select: {
-              user: true,
+              user: {
+                select: {
+                  id: true,
+                  name: true,
+                  identification: true,
+                  type_User: true,
+                },
+              },
             },
           },
         },
@@ -303,7 +314,14 @@ export class ReserveSportService {
         include: {
           reserve: {
             select: {
-              user: true,
+              user: {
+                select: {
+                  id: true,
+                  name: true,
+                  identification: true,
+                  type_User: true,
+                },
+              },
             },
           },
         },
@@ -311,7 +329,7 @@ export class ReserveSportService {
 
       await this.notificationService.create(
         'Reserva Cancelada',
-        `Sua reserva foi atualizada pelo servidor ${canceledReserve.anseweredBy}`,
+        `Sua reserva foi cancelada pelo servidor ${canceledReserve.anseweredBy}`,
         req,
         canceledReserve.reserve.user.id,
       );
@@ -348,7 +366,14 @@ export class ReserveSportService {
         include: {
           reserve: {
             select: {
-              user: true,
+              user: {
+                select: {
+                  id: true,
+                  name: true,
+                  identification: true,
+                  type_User: true,
+                },
+              },
             },
           },
         },

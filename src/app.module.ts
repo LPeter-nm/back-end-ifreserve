@@ -17,6 +17,8 @@ import { EmailModule } from './modules/email/email.module';
 import { RestoreModule } from './modules/restore/restore.module';
 import { ReportModule } from './modules/report/report.module';
 import { NotificationModule } from './modules/notification/notification.module';
+import { StudentModule } from './modules/student/student.module';
+import { ServerModule } from './modules/server/server.module';
 
 @Module({
   imports: [
@@ -36,6 +38,8 @@ import { NotificationModule } from './modules/notification/notification.module';
     RestoreModule,
     ReportModule,
     NotificationModule,
+    StudentModule,
+    ServerModule,
   ],
   providers: [
     {

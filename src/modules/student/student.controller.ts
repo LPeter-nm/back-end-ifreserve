@@ -3,45 +3,45 @@ import {
   Get,
   Post,
   Body,
+  Patch,
   Delete,
   UseGuards,
   Req,
-  Put,
 } from '@nestjs/common';
-import { UserExternalService } from './user-external.service';
-import {
-  CreateUserExternalDto,
-  UpdateUserExternalDto,
-} from './dto/userExternalDTO';
+import { StudentService } from './student.service';
+import { CreateStudentDto, UpdateStudentDto } from './dto/studentDto';
+import { ApiBearerAuth, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { PoliciesGuard } from '../casl/guards/policies.guard';
 import { Public } from '../auth/skipAuth/skipAuth';
 import { CheckPolicies } from '../casl/guards/policies.check';
 import { AppAbility } from '../casl/casl-ability.factory/casl-ability.factory';
 import { Action } from '../casl/casl-ability.factory/actionDTO/casl-actionDTO';
-import { PoliciesGuard } from '../casl/guards/policies.guard';
 import { Request } from 'express';
-import { ApiBearerAuth, ApiResponse, ApiTags } from '@nestjs/swagger';
 
-@ApiTags('Usuário Externo')
+@ApiTags('Aluno')
 @UseGuards(PoliciesGuard)
-@Controller('user-external')
-export class UserExternalController {
-  constructor(private readonly userExternalService: UserExternalService) {}
+@Controller('student')
+export class StudentController {
+  constructor(private readonly studentService: StudentService) {}
 
   @Public()
   @Post('register')
   @ApiResponse({
     status: 200,
-    description: 'Usuário externo registrado com sucesso',
+    description: 'Aluno registrado com sucesso',
   })
   @ApiResponse({
     status: 400,
-    description: 'Erro ao registrar usuário externo',
+    description: 'Erro ao registrar aluno',
   })
   @ApiResponse({ status: 409, description: 'Usuário já cadastrado' })
   @ApiResponse({ status: 417, description: 'Erro inesperado' })
-  @ApiResponse({ status: 500, description: 'Erro interno do servidor' })
-  create(@Body() body: CreateUserExternalDto) {
-    return this.userExternalService.registerExternal(body);
+  @ApiResponse({
+    status: 500,
+    description: 'Erro interno do servidor',
+  })
+  create(@Body() body: CreateStudentDto) {
+    return this.studentService.create(body);
   }
 
   @Get('users')
@@ -61,7 +61,7 @@ export class UserExternalController {
   @ApiBearerAuth('access_token')
   @CheckPolicies((ability: AppAbility) => ability.can(Action.General, 'all'))
   findAll() {
-    return this.userExternalService.findAll();
+    return this.studentService.findAll();
   }
 
   @Get()
@@ -81,10 +81,10 @@ export class UserExternalController {
   @ApiBearerAuth('access_token')
   @CheckPolicies((ability: AppAbility) => ability.can(Action.User, 'all'))
   findOne(@Req() req: Request) {
-    return this.userExternalService.findOne(req);
+    return this.studentService.findOne(req);
   }
 
-  @Put()
+  @Patch()
   @ApiResponse({
     status: 200,
     description: 'Usuário atualizado com sucesso',
@@ -100,8 +100,8 @@ export class UserExternalController {
   @ApiResponse({ status: 500, description: 'Erro interno do servidor' })
   @ApiBearerAuth('access_token')
   @CheckPolicies((ability: AppAbility) => ability.can(Action.User, 'all'))
-  update(@Body() body: UpdateUserExternalDto, @Req() req: Request) {
-    return this.userExternalService.update(req, body);
+  update(@Req() req: Request, @Body() body: UpdateStudentDto) {
+    return this.studentService.update(body, req);
   }
 
   @Delete()
@@ -121,6 +121,6 @@ export class UserExternalController {
   @ApiBearerAuth('access_token')
   @CheckPolicies((ability: AppAbility) => ability.can(Action.User, 'all'))
   remove(@Req() req: Request) {
-    return this.userExternalService.delete(req);
+    return this.studentService.remove(req);
   }
 }

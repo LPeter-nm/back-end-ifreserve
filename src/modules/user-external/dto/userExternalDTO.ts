@@ -44,7 +44,6 @@ export class CreateUserExternalDto {
   })
   @IsNotEmpty()
   address: string;
-
 }
 
 export class UpdateUserExternalDto {

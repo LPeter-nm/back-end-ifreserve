@@ -21,8 +21,8 @@ async function createGeneral() {
     const general = 'general_admin@example.com';
     const password = 'passexample';
     const name = 'Administrador geral';
-    const registration = '000000';
-    const functionServer = 'Função do servidor admin geral'
+    const registration = '00000000';
+    const functionServer = 'Função do servidor admin geral';
 
     const randomSalt = randomInt(10, 16);
     const hashedPassword = await bcrypt.hash(password, randomSalt);
@@ -37,8 +37,7 @@ async function createGeneral() {
         role: 'GENERAL',
         server: {
           create: {
-            funtion_Server: functionServer
-            
+            funtion_Server: functionServer,
           },
         },
       },
