@@ -81,7 +81,9 @@ export class RestoreService {
       return {
         message:
           'Token de redefinição enviado com sucesso! O tempo de expiração dele é de 20 minutos!',
-        passwordRedefinition,
+        tokenId: passwordRedefinition.id,
+        token: passwordRedefinition.token,
+        userId: passwordRedefinition.userId,
       };
     });
   }
