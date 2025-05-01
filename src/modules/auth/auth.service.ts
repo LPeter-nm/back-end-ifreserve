@@ -7,6 +7,7 @@ import {
 import { UserService } from '../user/user.service';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcryptjs';
+import { Throttle } from '@nestjs/throttler';
 
 @Injectable()
 export class AuthService {
@@ -15,6 +16,7 @@ export class AuthService {
     private readonly jwt: JwtService,
   ) {}
 
+  @Throttle({ default: { limit: 5, ttl: 60 } })
   async singIn(
     email: string,
     password: string,
@@ -22,11 +24,10 @@ export class AuthService {
     const user = await this.usr.findOne(email);
 
     if (!user)
-      throw new HttpException('Email não registrado', HttpStatus.NOT_FOUND);
+      throw new HttpException('Credenciais inválidas', HttpStatus.NOT_FOUND);
 
     const payload = {
       id: user.user?.id,
-      email: user.user?.email,
       role: user.user?.role,
     };
 
