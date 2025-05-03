@@ -6,6 +6,6 @@ export async function handleAsyncOperation<T>(
   try {
     return await operation();
   } catch (error) {
-    throw new HttpException(error as string, HttpStatus.BAD_REQUEST);
+    throw new HttpException(error.message as string, HttpStatus.BAD_REQUEST);
   }
 }

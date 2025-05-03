@@ -136,7 +136,7 @@ model Reserve {
   date_End DateTime
   hour_Start String
   hour_End String
-  userId String @unique
+  userId String 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   createdAt DateTime @default(now()) @map("created_at")

@@ -19,7 +19,7 @@ export class ReserveEventService {
     const dateStart = new Date(body.date_Start);
     const dateEnd = new Date(body.date_End);
 
-    validateReservationDates(dateStart, dateEnd);
+    validateReservationDates(dateStart, dateEnd, body.hour_Start);
 
     await checkConflictingReserves(
       dateStart,
@@ -132,7 +132,7 @@ export class ReserveEventService {
     const dateStart = new Date(body.date_Start);
     const dateEnd = new Date(body.date_End);
 
-    validateReservationDates(dateStart, dateEnd);
+    validateReservationDates(dateStart, dateEnd, body.hour_Start);
 
     await checkConflictingReserves(
       dateStart,

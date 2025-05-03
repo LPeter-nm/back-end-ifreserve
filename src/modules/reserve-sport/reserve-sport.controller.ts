@@ -10,7 +10,11 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { ReserveSportService } from './reserve-sport.service';
-import { CreateReserveSportDto, PutCommentsDto, UpdateReserveSportDto } from './dto/sportDto';
+import {
+  CreateReserveSportDto,
+  PutCommentsDto,
+  UpdateReserveSportDto,
+} from './dto/sportDto';
 import { Request } from 'express';
 import { PoliciesGuard } from '../casl/guards/policies.guard';
 import { CheckPolicies } from '../casl/guards/policies.check';
@@ -44,7 +48,7 @@ export class ReserveSportController {
   @ApiResponse({ status: 400, description: 'Erro ao criar reserva' })
   @ApiResponse({ status: 500, description: 'Erro interno do servidor' })
   @ApiBearerAuth('access_token')
-  @CheckPolicies((ability: AppAbility) => ability.can(Action.Admin, 'all'))
+  @Public()
   findAll() {
     return this.reserveSportService.findAll();
   }

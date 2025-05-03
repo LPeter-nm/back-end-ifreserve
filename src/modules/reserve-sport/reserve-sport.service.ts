@@ -26,7 +26,7 @@ export class ReserveSportService {
     const dateStart = new Date(body.date_Start);
     const dateEnd = new Date(body.date_End);
 
-    validateReservationDates(dateStart, dateEnd);
+    validateReservationDates(dateStart, dateEnd, body.hour_Start);
 
     const reserveCheck = await this.prisma.reserve.findFirst({
       where: { userId },
@@ -77,7 +77,7 @@ export class ReserveSportService {
           date_End: dateEnd,
           hour_Start: body.hour_Start,
           hour_End: body.hour_End,
-          userId: userId as string,
+          userId: userId,
           sport: {
             create: {
               type_Practice: body.type_Practice,
@@ -113,6 +113,7 @@ export class ReserveSportService {
   async findAll() {
     return handleAsyncOperation(async () => {
       const reserves = await this.prisma.sport.findMany({
+        where: { status: 'CONFIRMADA' },
         select: {
           id: true,
           type_Practice: true,
@@ -128,6 +129,7 @@ export class ReserveSportService {
                   name: true,
                 },
               },
+              type_Reserve: true,
               ocurrence: true,
               date_Start: true,
               hour_Start: true,
@@ -183,7 +185,7 @@ export class ReserveSportService {
     const dateStart = new Date(body.date_Start as string);
     const dateEnd = new Date(body.date_End as string);
 
-    validateReservationDates(dateStart, dateEnd);
+    validateReservationDates(dateStart, dateEnd, body.hour_Start);
 
     const conflictingReserves = await this.prisma.reserve.findMany({
       where: {
