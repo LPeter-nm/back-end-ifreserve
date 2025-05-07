@@ -40,7 +40,7 @@ export class ReportController {
     return this.reportService.create(createReportDto, req, reserveId);
   }
 
-  @Get()
+  @Get('reports')
   @ApiResponse({ status: 200, description: 'Relatórios listado com sucesso' })
   @ApiResponse({ status: 400, description: 'Erro ao listar relatórios' })
   @ApiResponse({ status: 500, description: 'Erro interno do servidor' })

@@ -16,16 +16,16 @@ export class ReserveEventService {
 
     await validateUser(userId);
 
-    const dateStart = new Date(body.date_Start);
-    const dateEnd = new Date(body.date_End);
-
-    validateReservationDates(dateStart, dateEnd, body.hour_Start);
-
-    await checkConflictingReserves(
-      dateStart,
-      dateEnd,
+    const validateDate = validateReservationDates(
+      body.date_Start,
+      body.date_End,
       body.hour_Start,
       body.hour_End,
+    );
+
+    await checkConflictingReserves(
+      validateDate.date_Start,
+      validateDate.date_End,
     );
 
     return handleAsyncOperation(async () => {
@@ -33,10 +33,8 @@ export class ReserveEventService {
         data: {
           type_Reserve: 'EVENTO',
           ocurrence: body.ocurrence,
-          date_Start: dateStart,
-          date_End: dateEnd,
-          hour_Start: body.hour_Start,
-          hour_End: body.hour_End,
+          dateTimeStart: validateDate.date_Start,
+          dateTimeEnd: validateDate.date_End,
           userId: userId,
           event: {
             create: {
@@ -74,10 +72,8 @@ export class ReserveEventService {
           reserve: {
             select: {
               ocurrence: true,
-              date_Start: true,
-              date_End: true,
-              hour_Start: true,
-              hour_End: true,
+              dateTimeStart: true,
+              dateTimeEnd: true,
             },
           },
         },
@@ -99,9 +95,8 @@ export class ReserveEventService {
           reserve: {
             select: {
               ocurrence: true,
-              date_Start: true,
-              hour_Start: true,
-              hour_End: true,
+              dateTimeStart: true,
+              dateTimeEnd: true,
             },
           },
         },
@@ -129,16 +124,16 @@ export class ReserveEventService {
       throw new HttpException('Reserva não encontrada', HttpStatus.NOT_FOUND);
     }
 
-    const dateStart = new Date(body.date_Start);
-    const dateEnd = new Date(body.date_End);
-
-    validateReservationDates(dateStart, dateEnd, body.hour_Start);
-
-    await checkConflictingReserves(
-      dateStart,
-      dateEnd,
+    const validateDate = validateReservationDates(
+      body.date_Start,
+      body.date_End,
       body.hour_Start,
       body.hour_End,
+    );
+
+    await checkConflictingReserves(
+      validateDate.date_Start,
+      validateDate.date_End,
     );
 
     return handleAsyncOperation(async () => {
@@ -146,10 +141,8 @@ export class ReserveEventService {
         where: { id },
         data: {
           ocurrence: body.ocurrence,
-          date_Start: dateStart,
-          date_End: dateEnd,
-          hour_Start: body.hour_Start,
-          hour_End: body.hour_End,
+          dateTimeStart: validateDate.date_Start,
+          dateTimeEnd: validateDate.date_End,
           event: {
             update: {
               name: body.name,

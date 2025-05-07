@@ -19,16 +19,16 @@ export class ReserveClassroomService {
 
     await validateUser(userId);
 
-    const dateStart = new Date(body.date_Start);
-    const dateEnd = new Date(body.date_End);
-
-    validateReservationDates(dateStart, dateEnd, body.hour_Start);
+    const validateDate = validateReservationDates(
+      body.date_Start,
+      body.date_End,
+      body.hour_Start,
+      body.hour_End,
+    );
 
     await checkConflictingReserves(
-      dateStart,
-      dateEnd,
-      body.hour_Start,
-      body.date_End,
+      validateDate.date_Start,
+      validateDate.date_End,
     );
 
     return handleAsyncOperation(async () => {
@@ -36,10 +36,8 @@ export class ReserveClassroomService {
         data: {
           type_Reserve: 'AULA',
           ocurrence: body.ocurrence,
-          date_Start: dateStart,
-          date_End: dateEnd,
-          hour_Start: body.hour_Start,
-          hour_End: body.hour_End,
+          dateTimeStart: validateDate.date_Start,
+          dateTimeEnd: validateDate.date_End,
           userId,
           classroom: {
             create: {
@@ -75,10 +73,8 @@ export class ReserveClassroomService {
           reserve: {
             select: {
               ocurrence: true,
-              date_Start: true,
-              date_End: true,
-              hour_Start: true,
-              hour_End: true,
+              dateTimeStart: true,
+              dateTimeEnd: true,
             },
           },
         },
@@ -99,9 +95,8 @@ export class ReserveClassroomService {
           reserve: {
             select: {
               ocurrence: true,
-              date_Start: true,
-              hour_Start: true,
-              hour_End: true,
+              dateTimeStart: true,
+              dateTimeEnd: true,
             },
           },
         },
@@ -119,20 +114,20 @@ export class ReserveClassroomService {
     const userId = req.user?.id as string;
     await validateUser(userId);
 
-    const dateStart = new Date(body.date_Start);
-    const dateEnd = new Date(body.date_End);
-
-    validateReservationDates(dateStart, dateEnd, body.hour_Start);
+    const validateDate = validateReservationDates(
+      body.date_Start,
+      body.date_End,
+      body.hour_Start,
+      body.date_End,
+    );
 
     return handleAsyncOperation(async () => {
       const reserveUpdated = await this.prisma.reserve.update({
         where: { id },
         data: {
           ocurrence: body.ocurrence,
-          date_Start: dateStart,
-          date_End: dateEnd,
-          hour_Start: body.hour_Start,
-          hour_End: body.hour_End,
+          dateTimeStart: validateDate.date_Start,
+          dateTimeEnd: validateDate.date_End,
           classroom: {
             update: {
               course: body.course,

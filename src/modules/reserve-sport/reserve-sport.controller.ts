@@ -88,7 +88,7 @@ export class ReserveSportController {
   @ApiResponse({ status: 401, description: 'Erro na requisição do usuário' })
   @ApiResponse({ status: 500, description: 'Erro interno do servidor' })
   @ApiBearerAuth('access_token')
-  @CheckPolicies((ability: AppAbility) => ability.can(Action.Admin, 'all'))
+  @CheckPolicies((ability: AppAbility) => ability.can(Action.General, 'all'))
   confirmed(
     @Req() req: Request,
     @Param('id') id: string,

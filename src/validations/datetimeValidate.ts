@@ -4,17 +4,13 @@ import { HttpException, HttpStatus } from '@nestjs/common';
 const prisma = new PrismaClient();
 
 export async function checkConflictingReserves(
-  dateStart: Date,
-  dateEnd: Date,
-  hourStart: string,
-  hourEnd: string,
+  dateTimeStart: Date,
+  dateTimeEnd: Date,
 ) {
   const conflictingReserves = await prisma.reserve.findMany({
     where: {
-      date_Start: { lte: dateEnd },
-      date_End: { gte: dateStart },
-      hour_Start: { lte: hourEnd },
-      hour_End: { gte: hourStart },
+      dateTimeStart: { lte: dateTimeStart },
+      dateTimeEnd: { gte: dateTimeEnd },
     },
   });
 

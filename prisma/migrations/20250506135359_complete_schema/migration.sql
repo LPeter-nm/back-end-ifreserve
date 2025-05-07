@@ -87,10 +87,8 @@ CREATE TABLE "Reserve" (
     "id" TEXT NOT NULL,
     "type_Reserve" "Type_Reserve" NOT NULL DEFAULT 'OFICIO',
     "ocurrence" "Ocurrence" NOT NULL,
-    "date_Start" TIMESTAMP(3) NOT NULL,
-    "date_End" TIMESTAMP(3) NOT NULL,
-    "hour_Start" TEXT NOT NULL,
-    "hour_End" TEXT NOT NULL,
+    "dateTimeStart" TIMESTAMP(3) NOT NULL,
+    "dateTimeEnd" TIMESTAMP(3) NOT NULL,
     "userId" TEXT NOT NULL,
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
@@ -191,12 +189,6 @@ CREATE UNIQUE INDEX "Student_userId_key" ON "Student"("userId");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "User_External_userId_key" ON "User_External"("userId");
-
--- CreateIndex
-CREATE UNIQUE INDEX "Reserve_userId_key" ON "Reserve"("userId");
-
--- CreateIndex
-CREATE INDEX "Reserve_date_Start_date_End_idx" ON "Reserve"("date_Start", "date_End");
 
 -- CreateIndex
 CREATE INDEX "Reserve_userId_idx" ON "Reserve"("userId");

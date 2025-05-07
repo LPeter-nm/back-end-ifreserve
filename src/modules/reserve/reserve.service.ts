@@ -6,10 +6,39 @@ import { handleAsyncOperation } from 'src/validations/prismaValidate';
 export class ReserveService {
   constructor(private readonly prisma: PrismaService) {}
 
+  async findAllConfirm() {
+    return handleAsyncOperation(async () => {
+      const reserves = await this.prisma.reserve.findMany({
+        where: { sport: { status: 'CONFIRMADA' } },
+        orderBy: { createdAt: 'desc' },
+        include: {
+          user: {
+            select: {
+              name: true,
+              role: true,
+            },
+          },
+          sport: true,
+          classroom: true,
+          event: true,
+        },
+      });
+
+      return reserves;
+    });
+  }
+
   async findAll() {
     return handleAsyncOperation(async () => {
       const reserves = await this.prisma.reserve.findMany({
+        orderBy: { createdAt: 'desc' },
         include: {
+          user: {
+            select: {
+              name: true,
+              role: true,
+            },
+          },
           sport: true,
           classroom: true,
           event: true,
@@ -23,7 +52,7 @@ export class ReserveService {
   findOne(id: string) {
     return handleAsyncOperation(async () => {
       const reserve = await this.prisma.reserve.findUnique({
-        where: { id },
+        where: { id: id },
         include: {
           sport: true,
           classroom: true,

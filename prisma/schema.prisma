@@ -8,9 +8,17 @@ datasource db {
 }
 
 enum Role {
-  GENERAL
-  ADMIN
+  SYSTEM_ADMIN
+  PE_ADMIN // Professores de Educação Física
   USER
+}
+
+enum ServerFunction {
+  PROFESSOR_EDUCACAO_FISICA
+  PROFESSOR_OUTROS
+  DIRETOR
+  COORDENADOR
+  OUTRO
 }
 
 enum Type_User {
@@ -49,7 +57,7 @@ enum Type_Practice {
   AMISTOSO
 }
 
-enum Ocurrence {
+enum Occurrence {
   EVENTO_UNICO
   SEMANALMENTE
 }
@@ -82,7 +90,7 @@ model User {
 // Tabela usuário interno 
 model Server {
   id String @id @default(uuid())
-  funtion_Server String
+  roleInInstitution ServerFunction
   userId String @unique @map("userId")
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -131,11 +139,9 @@ model Restore {
 model Reserve {
   id String @id @default(uuid())
   type_Reserve Type_Reserve @default(OFICIO)
-  ocurrence Ocurrence
-  date_Start DateTime
-  date_End DateTime
-  hour_Start String
-  hour_End String
+  occurrence Occurrence
+  dateTimeStart DateTime
+  dateTimeEnd DateTime
   userId String 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -144,8 +150,6 @@ model Reserve {
   sport Sport?
   classroom Classroom?
   event Event?
-
-  @@index([date_Start, date_End])
   @@index([userId])
 }
 

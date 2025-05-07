@@ -11,10 +11,17 @@ export class ReportService {
 
   async create(body: CreateReportDto, req: Request, sportId: string) {
     const userId = req.user?.id as string;
-
     await validateUser(userId);
 
     return handleAsyncOperation(async () => {
+      const sportExists = await this.prisma.sport.findUnique({
+        where: { id: sportId },
+      });
+
+      if (!sportExists) {
+        throw new HttpException('Esporte não encontrado', HttpStatus.NOT_FOUND);
+      }
+
       const userFound = await this.prisma.user.findFirst({
         where: { id: userId },
       });
@@ -37,6 +44,14 @@ export class ReportService {
         select: {
           id: true,
           name_User: true,
+          people_Appear: true,
+          requested_Equipment: true,
+          description: true,
+          description_Court: true,
+          description_Equipment: true,
+          time_Used: true,
+          date_Used: true,
+          sport: true,
         },
       });
 

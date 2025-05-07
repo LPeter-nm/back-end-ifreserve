@@ -23,10 +23,12 @@ export class ReserveSportService {
 
     await validateUser(userId);
 
-    const dateStart = new Date(body.date_Start);
-    const dateEnd = new Date(body.date_End);
-
-    validateReservationDates(dateStart, dateEnd, body.hour_Start);
+    const validateDate = validateReservationDates(
+      body.date_Start,
+      body.date_End,
+      body.hour_Start,
+      body.hour_End,
+    );
 
     const reserveCheck = await this.prisma.reserve.findFirst({
       where: { userId },
@@ -51,10 +53,8 @@ export class ReserveSportService {
 
     const conflictingReserves = await this.prisma.reserve.findMany({
       where: {
-        date_Start: { lte: dateEnd },
-        date_End: { gte: dateStart },
-        hour_Start: { lte: body.hour_End },
-        hour_End: { gte: body.hour_Start },
+        dateTimeStart: { lte: validateDate.date_Start },
+        dateTimeEnd: { gte: validateDate.date_End },
         sport: {
           status: 'CONFIRMADA',
         },
@@ -73,10 +73,8 @@ export class ReserveSportService {
         data: {
           type_Reserve: 'OFICIO',
           ocurrence: body.ocurrence,
-          date_Start: dateStart,
-          date_End: dateEnd,
-          hour_Start: body.hour_Start,
-          hour_End: body.hour_End,
+          dateTimeStart: validateDate.date_Start,
+          dateTimeEnd: validateDate.date_End,
           userId: userId,
           sport: {
             create: {
@@ -131,9 +129,8 @@ export class ReserveSportService {
               },
               type_Reserve: true,
               ocurrence: true,
-              date_Start: true,
-              hour_Start: true,
-              hour_End: true,
+              dateTimeStart: true,
+              dateTimeEnd: true,
             },
           },
         },
@@ -156,9 +153,8 @@ export class ReserveSportService {
           reserve: {
             select: {
               ocurrence: true,
-              date_Start: true,
-              hour_Start: true,
-              hour_End: true,
+              dateTimeStart: true,
+              dateTimeEnd: true,
             },
           },
         },
@@ -182,17 +178,17 @@ export class ReserveSportService {
       throw new HttpException('Reserva não encontrada', HttpStatus.NOT_FOUND);
     }
 
-    const dateStart = new Date(body.date_Start as string);
-    const dateEnd = new Date(body.date_End as string);
-
-    validateReservationDates(dateStart, dateEnd, body.hour_Start);
+    const validateDate = validateReservationDates(
+      body.date_Start,
+      body.date_End,
+      body.hour_Start,
+      body.hour_End,
+    );
 
     const conflictingReserves = await this.prisma.reserve.findMany({
       where: {
-        date_Start: { lte: dateEnd },
-        date_End: { gte: dateStart },
-        hour_Start: { lte: body.hour_End },
-        hour_End: { gte: body.hour_Start },
+        dateTimeStart: { lte: validateDate.date_Start },
+        dateTimeEnd: { gte: validateDate.date_End },
         sport: {
           status: 'CONFIRMADA',
         },
@@ -217,10 +213,8 @@ export class ReserveSportService {
           reserve: {
             update: {
               ocurrence: body.ocurrence,
-              date_Start: dateStart,
-              date_End: dateEnd,
-              hour_Start: body.hour_Start,
-              hour_End: body.hour_End,
+              dateTimeStart: validateDate.date_Start,
+              dateTimeEnd: validateDate.date_End,
             },
           },
         },
@@ -247,18 +241,12 @@ export class ReserveSportService {
       where: { id: req.user?.id },
     });
 
-    if (!userAdmin || userAdmin.role !== 'ADMIN') {
-      throw new HttpException(
-        'Apenas administradores são permitidos',
-        HttpStatus.UNAUTHORIZED,
-      );
-    }
     return handleAsyncOperation(async () => {
       const confirmedReserve = await this.prisma.sport.update({
         where: { id },
         data: {
           status: 'CONFIRMADA',
-          anseweredBy: userAdmin.name,
+          anseweredBy: userAdmin?.name,
           comments: body.comments,
         },
         include: {
@@ -299,18 +287,12 @@ export class ReserveSportService {
       where: { id: req.user?.id },
     });
 
-    if (!userAdmin || userAdmin.role !== 'ADMIN') {
-      throw new HttpException(
-        'Apenas administradores são permitidos',
-        HttpStatus.UNAUTHORIZED,
-      );
-    }
     return handleAsyncOperation(async () => {
       const canceledReserve = await this.prisma.sport.update({
         where: { id },
         data: {
           status: 'CANCELADA',
-          anseweredBy: userAdmin.name,
+          anseweredBy: userAdmin?.name,
           comments: body.comments,
         },
         include: {
