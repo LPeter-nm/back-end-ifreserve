@@ -1,10 +1,5 @@
 import { HttpException, HttpStatus } from '@nestjs/common';
 
-/**
- * Faz o parse de uma data no formato "dd/MM/yyyy, HH:mm"
- * @param dateTimeStr Ex: "08/05/2025, 15:10"
- * @returns Date
- */
 export function parseDateTime(dateTimeStr: string): Date {
   const [datePart, timePart] = dateTimeStr.split(',').map((s) => s.trim());
   const [day, month, year] = datePart.split('/').map(Number);
@@ -29,10 +24,6 @@ export function validateReservationDates(
   }
 
   if (dateTime_Start < currentDate || dateTime_End < currentDate) {
-    console.log('Data de início: ', dateTime_Start.toLocaleString('pt-BR'));
-    console.log('Data de fim: ', dateTime_End.toLocaleString('pt-BR'));
-    console.log('Data atual: ', currentDate.toLocaleString('pt-BR'));
-
     throw new HttpException(
       'Não é permitido registrar reservas em datas anteriores à data atual.',
       HttpStatus.EXPECTATION_FAILED,
