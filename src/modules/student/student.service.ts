@@ -16,7 +16,10 @@ export class StudentService {
       where: {
         AND: [
           {
-            OR: [{ identification: body.registration }, { email: body.email }],
+            OR: [
+              { identification: body.identification },
+              { email: body.email },
+            ],
           },
         ],
       },
@@ -36,9 +39,9 @@ export class StudentService {
       );
     }
 
-    const registrationCheck = /^\d{5}TMN\.[A-Z]{3}\d{4}$/;
+    const identificationCheck = /^\d{5}TMN\.[A-Z]{3}\d{4}$/;
 
-    if (!registrationCheck.test(body.registration)) {
+    if (!identificationCheck.test(body.identification)) {
       throw new HttpException(
         'O número de matrícula está no formato incorreto. Use o padrão: 00000TMN.XXX0000',
         HttpStatus.EXPECTATION_FAILED,
@@ -58,10 +61,10 @@ export class StudentService {
       const registerStudent = await this.prisma.user.create({
         data: {
           name: body.name,
-          identification: body.registration,
+          identification: body.identification,
           email: body.email,
           password: hashedPassword,
-          type_User: 'ALUNO',
+          typeUser: 'ALUNO',
           student: {
             create: {},
           },

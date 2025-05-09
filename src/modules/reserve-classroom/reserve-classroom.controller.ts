@@ -38,19 +38,10 @@ export class ReserveClassroomController {
   @ApiResponse({ status: 417, description: 'Datas inválidas' })
   @ApiResponse({ status: 500, description: 'Erro interno do servidor' })
   @ApiBearerAuth('access_token')
-  @CheckPolicies((ability: AppAbility) => ability.can(Action.Admin, 'all'))
+  @CheckPolicies((ability: AppAbility) => ability.can(Action.Control, 'all'))
+  @CheckPolicies((ability: AppAbility) => ability.can(Action.Manage, 'all'))
   create(@Body() body: CreateReserveClassroomDto, @Req() req: Request) {
     return this.reserveClassroomService.create(body, req);
-  }
-
-  @Get('reserves')
-  @ApiResponse({ status: 200, description: 'Reserva listada com sucesso' })
-  @ApiResponse({ status: 400, description: 'Erro ao listar reserva' })
-  @ApiResponse({ status: 500, description: 'Erro interno do servidor' })
-  @ApiBearerAuth('access_token')
-  @CheckPolicies((ability: AppAbility) => ability.can(Action.Admin, 'all'))
-  findAll() {
-    return this.reserveClassroomService.findAll();
   }
 
   @Get(':id')
@@ -72,7 +63,8 @@ export class ReserveClassroomController {
   @ApiResponse({ status: 417, description: 'Datas inválidas' })
   @ApiResponse({ status: 500, description: 'Erro interno do servidor' })
   @ApiBearerAuth('access_token')
-  @CheckPolicies((ability: AppAbility) => ability.can(Action.Admin, 'all'))
+  @CheckPolicies((ability: AppAbility) => ability.can(Action.Control, 'all'))
+  @CheckPolicies((ability: AppAbility) => ability.can(Action.Manage, 'all'))
   update(
     @Param('id') id: string,
     @Body() body: UpdateReserveClassroomDto,
@@ -87,7 +79,8 @@ export class ReserveClassroomController {
   @ApiResponse({ status: 404, description: 'Reserva não encontrada' })
   @ApiResponse({ status: 500, description: 'Erro interno do servidor' })
   @ApiBearerAuth('access_token')
-  @CheckPolicies((ability: AppAbility) => ability.can(Action.Admin, 'all'))
+  @CheckPolicies((ability: AppAbility) => ability.can(Action.Control, 'all'))
+  @CheckPolicies((ability: AppAbility) => ability.can(Action.Manage, 'all'))
   remove(@Param('id') id: string) {
     return this.reserveClassroomService.remove(id);
   }

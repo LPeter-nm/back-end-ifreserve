@@ -10,7 +10,11 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { ReportService } from './report.service';
-import { CreateReportDto, UpdateReportDto } from './dto/reportDto';
+import {
+  CreateReportDto,
+  UpdateReportDto,
+  UpdateWithComment,
+} from './dto/reportDto';
 import { Request } from 'express';
 import { PoliciesGuard } from '../casl/guards/policies.guard';
 import { CheckPolicies } from '../casl/guards/policies.check';
@@ -45,7 +49,8 @@ export class ReportController {
   @ApiResponse({ status: 400, description: 'Erro ao listar relatórios' })
   @ApiResponse({ status: 500, description: 'Erro interno do servidor' })
   @ApiBearerAuth('access_token')
-  @CheckPolicies((ability: AppAbility) => ability.can(Action.Admin, 'all'))
+  @CheckPolicies((ability: AppAbility) => ability.can(Action.Control, 'all'))
+  @CheckPolicies((ability: AppAbility) => ability.can(Action.Manage, 'all'))
   findAll() {
     return this.reportService.findAll();
   }
@@ -56,7 +61,7 @@ export class ReportController {
   @ApiResponse({ status: 404, description: 'Relatório não encontrado' })
   @ApiResponse({ status: 500, description: 'Erro interno do servidor' })
   @ApiBearerAuth('access_token')
-  @CheckPolicies((ability: AppAbility) => ability.can(Action.Admin, 'all'))
+  @CheckPolicies((ability: AppAbility) => ability.can(Action.Manage, 'all'))
   @CheckPolicies((ability: AppAbility) => ability.can(Action.User, 'all'))
   findOne(@Param('id') id: string) {
     return this.reportService.findOne(id);
@@ -83,7 +88,7 @@ export class ReportController {
   @ApiResponse({ status: 500, description: 'Erro interno do servidor' })
   @ApiBearerAuth('access_token')
   @CheckPolicies((ability: AppAbility) => ability.can(Action.User, 'all'))
-  updateStatus(@Param('id') id: string, @Body() body: UpdateReportDto) {
+  updateStatus(@Param('id') id: string, @Body() body: UpdateWithComment) {
     return this.reportService.updateStatus(id, body);
   }
 
@@ -93,7 +98,8 @@ export class ReportController {
   @ApiResponse({ status: 404, description: 'Relatório não encontrado' })
   @ApiResponse({ status: 500, description: 'Erro interno do servidor' })
   @ApiBearerAuth('access_token')
-  @CheckPolicies((ability: AppAbility) => ability.can(Action.Admin, 'all'))
+  @CheckPolicies((ability: AppAbility) => ability.can(Action.Control, 'all'))
+  @CheckPolicies((ability: AppAbility) => ability.can(Action.Manage, 'all'))
   remove(@Param('id') id: string) {
     return this.reportService.remove(id);
   }

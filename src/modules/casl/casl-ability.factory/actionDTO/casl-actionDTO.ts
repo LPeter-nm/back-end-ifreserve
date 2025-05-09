@@ -5,13 +5,13 @@ export class User {
 }
 
 export enum Action {
-  General = 'control',
-  Admin = 'manage',
+  Control = 'control',
+  Manage = 'manage',
   User = 'read',
 }
 
 export enum Role {
-  GENERAL = 'GENERAL',
+  SISTEMA_ADMIN = 'SISTEMA_ADMIN',
   USER = 'USER',
-  ADMIN = 'ADMIN',
+  PE_ADMIN = 'PE_ADMIN',
 }

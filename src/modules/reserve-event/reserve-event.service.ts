@@ -17,24 +17,19 @@ export class ReserveEventService {
     await validateUser(userId);
 
     const validateDate = validateReservationDates(
-      body.date_Start,
-      body.date_End,
-      body.hour_Start,
-      body.hour_End,
+      body.dateTimeStart,
+      body.dateTimeEnd,
     );
 
-    await checkConflictingReserves(
-      validateDate.date_Start,
-      validateDate.date_End,
-    );
+    await checkConflictingReserves(body.dateTimeStart, body.dateTimeEnd);
 
     return handleAsyncOperation(async () => {
       const reserve = await this.prisma.reserve.create({
         data: {
           type_Reserve: 'EVENTO',
-          ocurrence: body.ocurrence,
-          dateTimeStart: validateDate.date_Start,
-          dateTimeEnd: validateDate.date_End,
+          occurrence: body.occurrence,
+          dateTimeStart: validateDate.dateTime_Start,
+          dateTimeEnd: validateDate.dateTime_End,
           userId: userId,
           event: {
             create: {
@@ -48,38 +43,35 @@ export class ReserveEventService {
           user: {
             select: {
               name: true,
+              role: true,
             },
           },
           event: true,
         },
       });
 
-      return {
-        nameUser: reserve.user.name,
-        reserve,
-      };
-    });
-  }
-
-  async findAll() {
-    return handleAsyncOperation(async () => {
-      const reserves = await this.prisma.event.findMany({
-        select: {
-          id: true,
-          name: true,
-          description: true,
-          location: true,
-          reserve: {
-            select: {
-              ocurrence: true,
-              dateTimeStart: true,
-              dateTimeEnd: true,
-            },
+      if (
+        reserve.user.role === 'SISTEMA_ADMIN' ||
+        reserve.user.role === 'PE_ADMIN'
+      ) {
+        const updateRegistered = await this.prisma.reserve.update({
+          where: { id: reserve.id },
+          data: {
+            status: 'CADASTRADO',
           },
-        },
-      });
+        });
 
-      return reserves;
+        return {
+          message: 'Reserva cadastrada com sucesso',
+          updateRegistered,
+        };
+      } else {
+        return {
+          message:
+            'Reserva solicitada, aguarde a confirmação ou a recusa da mesma',
+          reserve,
+        };
+      }
     });
   }
 
@@ -94,7 +86,7 @@ export class ReserveEventService {
           location: true,
           reserve: {
             select: {
-              ocurrence: true,
+              occurrence: true,
               dateTimeStart: true,
               dateTimeEnd: true,
             },
@@ -110,13 +102,13 @@ export class ReserveEventService {
     });
   }
 
-  async update(id: string, req: Request, body: UpdateReserveEventDto) {
+  async update(eventId: string, req: Request, body: UpdateReserveEventDto) {
     const userId = req.user?.id as string;
     await validateUser(userId, 'Você só pode atualizar suas reservas');
 
     const reserveFind = await this.prisma.event.findFirst({
       where: {
-        id,
+        id: eventId,
       },
     });
 
@@ -125,44 +117,42 @@ export class ReserveEventService {
     }
 
     const validateDate = validateReservationDates(
-      body.date_Start,
-      body.date_End,
-      body.hour_Start,
-      body.hour_End,
+      body.dateTimeStart,
+      body.dateTimeEnd,
     );
 
-    await checkConflictingReserves(
-      validateDate.date_Start,
-      validateDate.date_End,
-    );
+    await checkConflictingReserves(body.dateTimeStart, body.dateTimeEnd);
 
     return handleAsyncOperation(async () => {
-      const reserveUpdated = await this.prisma.reserve.update({
-        where: { id },
+      const reserveUpdated = await this.prisma.event.update({
+        where: { id: eventId },
         data: {
-          ocurrence: body.ocurrence,
-          dateTimeStart: validateDate.date_Start,
-          dateTimeEnd: validateDate.date_End,
-          event: {
+          name: body.name,
+          description: body.description,
+          location: body.location,
+          reserve: {
             update: {
-              name: body.name,
-              description: body.description,
-              location: body.location,
+              occurrence: body.occurrence,
+              dateTimeStart: validateDate.dateTime_Start,
+              dateTimeEnd: validateDate.dateTime_End,
             },
           },
         },
         include: {
-          user: {
+          reserve: {
             select: {
-              name: true,
+              user: {
+                select: {
+                  name: true,
+                },
+              },
             },
           },
-          event: true,
         },
       });
 
       return {
-        nameUser: reserveUpdated.user.name,
+        nameUser: reserveUpdated.reserve.user.name,
         reserveUpdated,
       };
     });
@@ -175,8 +165,6 @@ export class ReserveEventService {
       if (!reserve) {
         throw new HttpException('Reserva não encontrada', HttpStatus.NOT_FOUND);
       }
-
-      await prisma.event.delete({ where: { id } });
 
       await prisma.reserve.delete({
         where: { id: reserve.reserveId },

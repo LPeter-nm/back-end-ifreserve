@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsNotEmpty } from 'class-validator';
-import { Ocurrence } from 'src/modules/reserve/dto/reserveDto';
+import { Occurrence } from 'src/modules/reserve/dto/reserveDto';
 
 export class CreateReserveEventDto {
   @ApiProperty({
@@ -30,35 +30,21 @@ export class CreateReserveEventDto {
     description: 'Ocorrência da reserva',
   })
   @IsNotEmpty()
-  ocurrence: Ocurrence;
+  occurrence: Occurrence;
 
   @ApiProperty({
-    example: '2025-02-25',
-    description: 'Data de ínicio',
+    example: '26/05/2025, 14:25',
+    description: 'Data e hora de ínicio',
   })
   @IsNotEmpty()
-  date_Start: string;
+  dateTimeStart: string;
 
   @ApiProperty({
-    example: '2025-02-25',
-    description: 'Data de fim',
+    example: '26/05/2025, 15:25',
+    description: 'Data e hora de fim',
   })
   @IsNotEmpty()
-  date_End: string;
-
-  @ApiProperty({
-    example: '11:00',
-    description: 'Hora de ínicio',
-  })
-  @IsNotEmpty()
-  hour_Start: string;
-
-  @ApiProperty({
-    example: '12:00',
-    description: 'Hora de fim',
-  })
-  @IsNotEmpty()
-  hour_End: string;
+  dateTimeEnd: string;
 }
 
 export class UpdateReserveEventDto {
@@ -85,29 +71,17 @@ export class UpdateReserveEventDto {
     example: 'SEMANALMENTE',
     description: 'Ocorrência da reserva',
   })
-  ocurrence?: Ocurrence;
+  occurrence?: Occurrence;
 
   @ApiProperty({
-    example: '2025-02-25',
-    description: 'Data de ínicio',
+    example: '26/05/2025, 14:25',
+    description: 'Data e hora de ínicio',
   })
-  date_Start: string;
+  dateTimeStart: string;
 
   @ApiProperty({
-    example: '2025-02-25',
-    description: 'Data de fim',
+    example: '26/05/2025, 15:25',
+    description: 'Data e hora de fim',
   })
-  date_End: string;
-
-  @ApiProperty({
-    example: '11:00',
-    description: 'Hora de ínicio',
-  })
-  hour_Start: string;
-
-  @ApiProperty({
-    example: '12:00',
-    description: 'Hora de fim',
-  })
-  hour_End: string;
+  dateTimeEnd: string;
 }

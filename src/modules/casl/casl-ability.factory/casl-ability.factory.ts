@@ -19,13 +19,14 @@ export class CaslAbilityFactory {
     >(Ability as AbilityClass<AppAbility>);
 
     switch (user?.role) {
-      case 'GENERAL':
-        can(Action.General, 'all');
-
+      case 'SISTEMA_ADMIN':
+        can(Action.Control, 'all');
+        can(Action.Manage, 'all');
+        can(Action.User, 'all');
         break;
-      case 'ADMIN':
-        can(Action.Admin, 'all');
-
+      case 'PE_ADMIN':
+        can(Action.Manage, 'all');
+        can(Action.User, 'all');
         break;
       case 'USER':
         can(Action.User, 'all');

@@ -2,22 +2,27 @@ import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { Request } from 'express';
 import { PrismaService } from 'src/database/PrismaService';
 import { handleAsyncOperation } from 'src/validations/prismaValidate';
+import { TypeNotification } from './dto/notificationDto';
 
 @Injectable()
 export class NotificationService {
   constructor(private readonly prisma: PrismaService) {}
 
   async create(
-    message: string,
-    description: string,
+    title: string,
+    content: string,
+    type: TypeNotification,
     req: Request,
+    linkTo?: string,
     userId?: string,
   ) {
     return handleAsyncOperation(async () => {
       const notification = await this.prisma.notification.create({
         data: {
-          message,
-          description,
+          title,
+          content,
+          type,
+          linkTo,
           userId: userId ? (userId as string) : (req.user?.id as string),
         },
       });

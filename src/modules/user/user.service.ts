@@ -6,7 +6,6 @@ import {
 } from '@nestjs/common';
 import { PrismaService } from 'src/database/PrismaService';
 
-
 @Injectable()
 export class UserService {
   constructor(private readonly prisma: PrismaService) {}
@@ -61,7 +60,7 @@ export class UserService {
       if (!user)
         throw new HttpException('Usuário não encontrado', HttpStatus.NOT_FOUND);
 
-      if (user.role === 'GENERAL')
+      if (user.role === 'SISTEMA_ADMIN')
         throw new ForbiddenException(
           'Não é permitido excluir o administrador geral',
         );

@@ -1,15 +1,28 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/database/PrismaService';
 import { handleAsyncOperation } from 'src/validations/prismaValidate';
+import { NotificationService } from '../notification/notification.service';
+import { PutCommentsDto } from './dto/reserveDto';
+import { Request } from 'express';
+import { TypeNotification } from '../notification/dto/notificationDto';
 
 @Injectable()
 export class ReserveService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly notificationService: NotificationService,
+  ) {}
 
   async findAllConfirm() {
     return handleAsyncOperation(async () => {
       const reserves = await this.prisma.reserve.findMany({
-        where: { sport: { status: 'CONFIRMADA' } },
+        where: {
+          AND: [
+            {
+              OR: [{ status: 'CONFIRMADA' }, { status: 'CADASTRADO' }],
+            },
+          ],
+        },
         orderBy: { createdAt: 'desc' },
         include: {
           user: {
@@ -49,6 +62,29 @@ export class ReserveService {
     });
   }
 
+  async findAllUser(req: Request) {
+    return handleAsyncOperation(async () => {
+      const userId = req.user?.id;
+      const reserves = await this.prisma.reserve.findMany({
+        where: { userId },
+        orderBy: { createdAt: 'desc' },
+        include: {
+          user: {
+            select: {
+              name: true,
+              role: true,
+            },
+          },
+          sport: true,
+          classroom: true,
+          event: true,
+        },
+      });
+
+      return reserves;
+    });
+  }
+
   findOne(id: string) {
     return handleAsyncOperation(async () => {
       const reserve = await this.prisma.reserve.findUnique({
@@ -65,6 +101,108 @@ export class ReserveService {
       }
 
       return reserve;
+    });
+  }
+
+  async updateConfirmed(req: Request, id: string, body: PutCommentsDto) {
+    const reserve = await this.prisma.reserve.findFirst({ where: { id } });
+
+    if (!reserve) {
+      throw new HttpException('Reserva não encontrada', HttpStatus.NOT_FOUND);
+    }
+
+    const userAdmin = await this.prisma.user.findFirst({
+      where: { id: req.user?.id },
+    });
+
+    return handleAsyncOperation(async () => {
+      const confirmedReserve = await this.prisma.reserve.update({
+        where: { id },
+        data: {
+          answeredBy: userAdmin?.name,
+          comments: body.comments,
+          status: 'CONFIRMADA',
+        },
+        include: {
+          user: true,
+        },
+      });
+
+      await this.notificationService.create(
+        'Reserva Confirmada',
+        `Sua reserva foi atualizada pelo servidor ${confirmedReserve.answeredBy}`,
+        'RESERVA_CONFIRMADA' as TypeNotification,
+        req,
+        undefined,
+        confirmedReserve.user.id,
+      );
+
+      return confirmedReserve;
+    });
+  }
+
+  async updateCanceled(req: Request, id: string, body: PutCommentsDto) {
+    const reserve = await this.prisma.reserve.findFirst({ where: { id } });
+
+    if (!reserve) {
+      throw new HttpException('Reserva não encontrada', HttpStatus.NOT_FOUND);
+    }
+
+    const userAdmin = await this.prisma.user.findFirst({
+      where: { id: req.user?.id },
+    });
+
+    return handleAsyncOperation(async () => {
+      const canceledReserve = await this.prisma.reserve.update({
+        where: { id },
+        data: {
+          answeredBy: userAdmin?.name,
+          comments: body.comments,
+          status: 'CANCELADA',
+        },
+        include: {
+          user: true,
+        },
+      });
+
+      return canceledReserve;
+    });
+  }
+
+  async updateRefused(req: Request, id: string, body: PutCommentsDto) {
+    const reserve = await this.prisma.reserve.findFirst({ where: { id } });
+
+    if (!reserve) {
+      throw new HttpException('Reserva não encontrada', HttpStatus.NOT_FOUND);
+    }
+
+    const userAdmin = await this.prisma.user.findFirst({
+      where: { id: req.user?.id },
+    });
+
+    return handleAsyncOperation(async () => {
+      const refusedReserve = await this.prisma.reserve.update({
+        where: { id },
+        data: {
+          answeredBy: userAdmin?.name,
+          comments: body.comments,
+          status: 'RECUSADA',
+        },
+        include: {
+          user: true,
+        },
+      });
+
+      await this.notificationService.create(
+        'Reserva Recusada',
+        `Sua reserva foi recusada pelo servidor ${refusedReserve.answeredBy}`,
+        'RESERVA_RECUSADA' as TypeNotification,
+        req,
+        undefined,
+        refusedReserve.user.id,
+      );
+
+      return refusedReserve;
     });
   }
 }

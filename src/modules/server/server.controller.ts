@@ -59,7 +59,7 @@ export class ServerController {
   })
   @ApiResponse({ status: 500, description: 'Erro interno do servidor' })
   @ApiBearerAuth('access_token')
-  @CheckPolicies((ability: AppAbility) => ability.can(Action.General, 'all'))
+  @CheckPolicies((ability: AppAbility) => ability.can(Action.Control, 'all'))
   findAll() {
     return this.serverService.findAll();
   }

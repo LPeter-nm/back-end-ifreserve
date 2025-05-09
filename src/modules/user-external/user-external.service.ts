@@ -1,8 +1,4 @@
-import {
-  HttpException,
-  HttpStatus,
-  Injectable,
-} from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import {
   CreateUserExternalDto,
   UpdateUserExternalDto,
@@ -51,7 +47,7 @@ export class UserExternalService {
           email: body.email,
           identification: body.cpf,
           password: hashedPassword,
-          type_User: 'EXTERNO',
+          typeUser: 'EXTERNO',
           userExternal: {
             create: {
               phone: body.phone,
@@ -82,7 +78,7 @@ export class UserExternalService {
 
   async findAll() {
     return handleAsyncOperation(async () => {
-      const users = await this.prisma.user_External.findMany({
+      const users = await this.prisma.userExternal.findMany({
         select: {
           user: {
             select: {
@@ -109,7 +105,7 @@ export class UserExternalService {
     await validateUser(userId);
 
     return handleAsyncOperation(async () => {
-      const usrExternal = await this.prisma.user_External.findFirst({
+      const usrExternal = await this.prisma.userExternal.findFirst({
         where: { userId },
         select: {
           id: true,

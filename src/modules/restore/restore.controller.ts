@@ -48,7 +48,7 @@ export class RestoreController {
 
   //somente para testes
   @Get(':userId')
-  @CheckPolicies((ability: AppAbility) => ability.can(Action.Admin, 'all'))
+  @CheckPolicies((ability: AppAbility) => ability.can(Action.Control, 'all'))
   async findAllTokens(@Param('userId') userId: string) {
     try {
       return await this.restoreService.findAllTokens(userId);

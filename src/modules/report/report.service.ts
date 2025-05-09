@@ -1,5 +1,9 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
-import { CreateReportDto, UpdateReportDto } from './dto/reportDto';
+import {
+  CreateReportDto,
+  UpdateReportDto,
+  UpdateWithComment,
+} from './dto/reportDto';
 import { Request } from 'express';
 import { PrismaService } from 'src/database/PrismaService';
 import { validateUser } from 'src/validations/authValidate';
@@ -29,7 +33,7 @@ export class ReportService {
       const report = await this.prisma.report.create({
         data: {
           ...body,
-          name_User: userFound?.name as string,
+          nameUser: userFound?.name as string,
           sportId,
         },
       });
@@ -43,14 +47,14 @@ export class ReportService {
       const reports = await this.prisma.report.findMany({
         select: {
           id: true,
-          name_User: true,
-          people_Appear: true,
-          requested_Equipment: true,
-          description: true,
-          description_Court: true,
-          description_Equipment: true,
-          time_Used: true,
-          date_Used: true,
+          nameUser: true,
+          peopleAppear: true,
+          requestedEquipment: true,
+          generalComments: true,
+          courtCondition: true,
+          equipmentCondition: true,
+          timeUsed: true,
+          dateUsed: true,
           sport: true,
         },
       });
@@ -65,14 +69,14 @@ export class ReportService {
         where: { id },
         select: {
           id: true,
-          name_User: true,
-          people_Appear: true,
-          requested_Equipment: true,
-          description: true,
-          description_Court: true,
-          description_Equipment: true,
-          time_Used: true,
-          date_Used: true,
+          nameUser: true,
+          peopleAppear: true,
+          requestedEquipment: true,
+          generalComments: true,
+          courtCondition: true,
+          equipmentCondition: true,
+          timeUsed: true,
+          dateUsed: true,
           sport: true,
         },
       });
@@ -107,7 +111,7 @@ export class ReportService {
     });
   }
 
-  async updateStatus(id: string, body: UpdateReportDto) {
+  async updateStatus(id: string, body: UpdateWithComment) {
     const reportFound = await this.prisma.report.findFirst({ where: { id } });
 
     if (!reportFound) {
@@ -118,8 +122,8 @@ export class ReportService {
       const updatedReportStatus = await this.prisma.report.update({
         where: { id },
         data: {
-          comments: body.comments,
-          status: true,
+          commentsAdmin: body.commentsAdmin,
+          statusReadAdmin: true,
         },
       });
 

@@ -15,7 +15,7 @@ export class CreateStudentDto {
   })
   @Length(16, 16)
   @IsNotEmpty()
-  registration: string;
+  identification: string;
 
   @ApiProperty({
     example: 'aluno@exemplo.com',

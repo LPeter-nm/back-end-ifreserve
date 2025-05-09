@@ -7,48 +7,48 @@ export class CreateReportDto {
     description: 'Pessoas que apareceram na quadra no momento da reserva',
   })
   @IsNotEmpty()
-  people_Appear: string;
+  peopleAppear: string;
 
   @ApiProperty({
     example: 'Bola de vôlei, postes e rede',
     description: 'Equipamentos que foram solicitados para a reserva',
   })
   @IsNotEmpty()
-  requested_Equipment: string;
+  requestedEquipment: string;
 
   @ApiProperty({
     example: 'A quadra estava bem limpa',
     description: 'Descrição da quadra',
   })
   @IsNotEmpty()
-  description_Court: string;
+  courtCondition: string;
 
   @ApiProperty({
     example: 'Os equipamentos estavam em ótimas condições',
     description: 'Descrição dos equipamentos solicitados',
   })
   @IsNotEmpty()
-  description_Equipment: string;
+  equipmentCondition: string;
 
   @ApiProperty({
     example: '1h30',
     description: 'Tempo de uso da quadra',
   })
   @IsNotEmpty()
-  time_Used: string;
+  timeUsed: string;
 
   @ApiProperty({
     example: '2025-03-15',
     description: 'Data de uso da quadra',
   })
   @IsNotEmpty()
-  date_Used: string;
+  dateUsed: string;
 
   @ApiProperty({
     example: 'A reserva ocorreu tranquilamente',
     description: 'descrição livre do usuário sobre a reserva',
   })
-  description?: string;
+  generalComments?: string;
 }
 
 export class UpdateReportDto {
@@ -56,47 +56,50 @@ export class UpdateReportDto {
     example: 'Fulano 1 - 00000EXP.TMN00000; Fulano 2 - 000.000.000-00; ...',
     description: 'Pessoas que apareceram na quadra no momento da reserva',
   })
-  people_Appear?: string;
+  peopleAppear?: string;
 
   @ApiProperty({
     example: 'Bola de vôlei, postes e rede',
     description: 'Equipamentos que foram solicitados para a reserva',
   })
-  requested_Equipment?: string;
+  requestedEquipment?: string;
 
   @ApiProperty({
     example: 'A quadra estava bem limpa',
     description: 'Descrição da quadra',
   })
-  description_Court?: string;
+  courtCondition?: string;
 
   @ApiProperty({
     example: 'Os equipamentos estavam em ótimas condições',
     description: 'Descrição dos equipamentos solicitados',
   })
-  description_Equipment?: string;
+  equipmentCondition?: string;
 
   @ApiProperty({
     example: '1h30',
     description: 'Tempo de uso da quadra',
   })
-  time_Used?: string;
+  timeUsed?: string;
 
   @ApiProperty({
     example: '2025-03-15',
     description: 'Data de uso da quadra',
   })
-  date_Used?: string;
+  dateUsed?: string;
 
   @ApiProperty({
     example: 'A reserva ocorreu tranquilamente',
     description: 'descrição livre do usuário sobre a reserva',
   })
-  description?: string;
+  generalComments?: string;
+}
 
+export class UpdateWithComment {
   @ApiProperty({
-    example: 'Obrigado por utilizar nossa quadra e que venha mais vezes',
-    description: 'comentário do servidor que irá visualizar o relatório',
+    example: 'A reserva foi recusada por tais motivos...',
+    description:
+      'Comentário opcional do admnistrador sobre os motivos de recusa',
   })
-  comments?: string;
+  commentsAdmin?: string;
 }

@@ -3,16 +3,22 @@ import {
   CreateReserveClassroomDto,
   UpdateReserveClassroomDto,
 } from './dto/classroomDto';
+import { PutCommentsDto } from '../reserve/dto/reserveDto';
 import { PrismaService } from 'src/database/PrismaService';
 import { Request } from 'express';
 import { validateUser } from 'src/validations/authValidate';
 import { checkConflictingReserves } from 'src/validations/datetimeValidate';
 import { handleAsyncOperation } from 'src/validations/prismaValidate';
 import { validateReservationDates } from 'src/validations/reservationDateValidate';
+import { NotificationService } from '../notification/notification.service';
+import { TypeNotification } from '../notification/dto/notificationDto';
 
 @Injectable()
 export class ReserveClassroomService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly notificationService: NotificationService,
+  ) {}
 
   async create(body: CreateReserveClassroomDto, req: Request) {
     const userId = req.user?.id as string;
@@ -20,24 +26,19 @@ export class ReserveClassroomService {
     await validateUser(userId);
 
     const validateDate = validateReservationDates(
-      body.date_Start,
-      body.date_End,
-      body.hour_Start,
-      body.hour_End,
+      body.dateTimeStart,
+      body.dateTimeEnd,
     );
 
-    await checkConflictingReserves(
-      validateDate.date_Start,
-      validateDate.date_End,
-    );
+    await checkConflictingReserves(body.dateTimeStart, body.dateTimeEnd);
 
     return handleAsyncOperation(async () => {
       const reserve = await this.prisma.reserve.create({
         data: {
           type_Reserve: 'AULA',
-          ocurrence: body.ocurrence,
-          dateTimeStart: validateDate.date_Start,
-          dateTimeEnd: validateDate.date_End,
+          occurrence: body.ocurrence,
+          dateTimeStart: validateDate.dateTime_Start,
+          dateTimeEnd: validateDate.dateTime_End,
           userId,
           classroom: {
             create: {
@@ -50,37 +51,35 @@ export class ReserveClassroomService {
           user: {
             select: {
               name: true,
+              role: true,
+              typeUser: true,
             },
           },
           classroom: true,
         },
       });
 
-      return {
-        nameUser: reserve.user.name,
-        reserve,
-      };
-    });
-  }
-
-  findAll() {
-    return handleAsyncOperation(async () => {
-      const reserves = await this.prisma.classroom.findMany({
-        select: {
-          id: true,
-          course: true,
-          matter: true,
-          reserve: {
-            select: {
-              ocurrence: true,
-              dateTimeStart: true,
-              dateTimeEnd: true,
-            },
+      if (
+        reserve.user.role === 'SISTEMA_ADMIN' ||
+        reserve.user.role === 'PE_ADMIN'
+      ) {
+        const updateRegistered = await this.prisma.reserve.update({
+          where: { id: reserve.id },
+          data: {
+            status: 'CADASTRADO',
           },
-        },
-      });
+        });
 
-      return reserves;
+        return {
+          message: 'Reserva cadastrada com sucesso',
+          updateRegistered,
+        };
+      } else {
+        return {
+          message: 'Reserva solicitada com sucesso',
+          reserve,
+        };
+      }
     });
   }
 
@@ -94,7 +93,8 @@ export class ReserveClassroomService {
           matter: true,
           reserve: {
             select: {
-              ocurrence: true,
+              status: true,
+              occurrence: true,
               dateTimeStart: true,
               dateTimeEnd: true,
             },
@@ -110,43 +110,58 @@ export class ReserveClassroomService {
     });
   }
 
-  async update(id: string, req: Request, body: UpdateReserveClassroomDto) {
+  async update(
+    classroomId: string,
+    req: Request,
+    body: UpdateReserveClassroomDto,
+  ) {
     const userId = req.user?.id as string;
     await validateUser(userId);
 
+    const classroomFind = await this.prisma.classroom.findFirst({
+      where: { id: classroomId },
+    });
+
+    if (!classroomFind) {
+      throw new HttpException('Reserva não encontrada', HttpStatus.NOT_FOUND);
+    }
+
     const validateDate = validateReservationDates(
-      body.date_Start,
-      body.date_End,
-      body.hour_Start,
-      body.date_End,
+      body.dateTimeStart,
+      body.dateTimeEnd,
     );
 
+    await checkConflictingReserves(body.dateTimeStart, body.dateTimeEnd);
+
     return handleAsyncOperation(async () => {
-      const reserveUpdated = await this.prisma.reserve.update({
-        where: { id },
+      const reserveUpdated = await this.prisma.classroom.update({
+        where: { id: classroomId },
         data: {
-          ocurrence: body.ocurrence,
-          dateTimeStart: validateDate.date_Start,
-          dateTimeEnd: validateDate.date_End,
-          classroom: {
+          course: body.course,
+          matter: body.matter,
+          reserve: {
             update: {
-              course: body.course,
-              matter: body.matter,
+              occurrence: body.ocurrence,
+              dateTimeStart: validateDate.dateTime_Start,
+              dateTimeEnd: validateDate.dateTime_End,
             },
           },
         },
         include: {
-          user: {
+          reserve: {
             select: {
-              name: true,
+              user: {
+                select: {
+                  name: true,
+                },
+              },
             },
           },
-          classroom: true,
         },
       });
 
       return {
-        nameUser: reserveUpdated.user.name,
+        message: 'Reserva atualizada com sucesso',
         reserveUpdated,
       };
     });
@@ -159,8 +174,6 @@ export class ReserveClassroomService {
       if (!reserve) {
         throw new HttpException('Reserva não encontrada', HttpStatus.NOT_FOUND);
       }
-
-      await prisma.classroom.delete({ where: { id } });
 
       await prisma.reserve.delete({
         where: { id: reserve.reserveId },

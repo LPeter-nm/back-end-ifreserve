@@ -1,5 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsNotEmpty, Length } from 'class-validator';
+import { FunctionServer } from 'src/modules/user/dto/userDto';
 
 export class CreateServerDto {
   @ApiProperty({
@@ -15,14 +16,14 @@ export class CreateServerDto {
   })
   @Length(6, 8)
   @IsNotEmpty()
-  registration: string;
+  identification: string;
 
   @ApiProperty({
-    example: 'Professor de Física',
+    example: 'Professor de educação física',
     description: 'Função do servidor no Instituto',
   })
   @IsNotEmpty()
-  function_Server: string;
+  roleInInstitution: FunctionServer;
 
   @ApiProperty({
     example: 'servidor@example.com',
@@ -48,10 +49,10 @@ export class UpdateServerDto {
   name?: string;
 
   @ApiProperty({
-    example: 'Professor de Física',
+    example: 'Professor de educação física',
     description: 'Função do servidor no Instituto',
   })
-  function_Server?: string;
+  roleInInstitution?: FunctionServer;
 
   @ApiProperty({
     example: '00000000',

@@ -1,11 +1,13 @@
-export enum Role {
-  GENERAL = 'GENERAL',
-  ADMIN = 'ADMIN',
-  USER = 'USER',
-}
-
-export enum Type_User {
+export enum TypeUser {
   ALUNO = 'ALUNO',
   SERVIDOR = 'SERVIDOR',
   EXTERNO = 'EXTERNO',
+}
+
+export enum FunctionServer {
+  PROFESSOR_EDUCACAO_FISICA = 'PROFESSOR_EDUCACAO_FISICA',
+  PROFESSOR_OUTROS = 'PROFESSOR_OUTROS',
+  DIRETOR = 'DIRETOR',
+  COORDENADOR = 'COORDENADOR',
+  OUTRO = 'OUTRO',
 }

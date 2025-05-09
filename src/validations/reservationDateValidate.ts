@@ -1,48 +1,53 @@
 import { HttpException, HttpStatus } from '@nestjs/common';
 
+/**
+ * Faz o parse de uma data no formato "dd/MM/yyyy, HH:mm"
+ * @param dateTimeStr Ex: "08/05/2025, 15:10"
+ * @returns Date
+ */
+export function parseDateTime(dateTimeStr: string): Date {
+  const [datePart, timePart] = dateTimeStr.split(',').map((s) => s.trim());
+  const [day, month, year] = datePart.split('/').map(Number);
+  const [hours, minutes] = timePart.split(':').map(Number);
+
+  return new Date(year, month - 1, day, hours, minutes);
+}
+
 export function validateReservationDates(
-  dateStart: string,
-  dateEnd: string,
-  hourStart: string,
-  hourEnd,
+  dateTimeStart: string,
+  dateTimeEnd: string,
 ) {
-  const [yearS, monthS, dayS] = dateStart.split('-').map(Number);
-  const [hourS, minutesS] = hourStart.split(':').map(Number);
-
-  const [yearE, monthE, dayE] = dateEnd.split('-').map(Number);
-  const [hourE, minutesE] = hourEnd.split(':').map(Number);
-
-  const date_Start = new Date(yearS, monthS - 1, dayS, hourS, minutesS);
-  const date_End = new Date(yearE, monthE - 1, dayE, hourE, minutesE);
-
+  const dateTime_Start = parseDateTime(dateTimeStart);
+  const dateTime_End = parseDateTime(dateTimeEnd);
   const currentDate = new Date();
 
-  if (
-    date_Start.getTime() < currentDate.getTime() ||
-    date_End.getTime() < currentDate.getTime()
-  ) {
-    console.log('Data de inicio: ', date_Start.toLocaleString('pt-BR'));
-    console.log('Data de final: ', date_End.toLocaleString('pt-BR'));
+  if (isNaN(dateTime_Start.getTime()) || isNaN(dateTime_End.getTime())) {
+    throw new HttpException(
+      'Formato de data/hora inválido. Use "dd/MM/yyyy, HH:mm".',
+      HttpStatus.BAD_REQUEST,
+    );
+  }
+
+  if (dateTime_Start < currentDate || dateTime_End < currentDate) {
+    console.log('Data de início: ', dateTime_Start.toLocaleString('pt-BR'));
+    console.log('Data de fim: ', dateTime_End.toLocaleString('pt-BR'));
     console.log('Data atual: ', currentDate.toLocaleString('pt-BR'));
+
     throw new HttpException(
       'Não é permitido registrar reservas em datas anteriores à data atual.',
       HttpStatus.EXPECTATION_FAILED,
     );
-  } else {
-    return {
-      date_Start,
-      date_End,
-    };
   }
 
-  // if (
-  //   dS < currentDate ||
-  //   dE < currentDate ||
-  //   (hourStart < hourNow && dS < currentDate)
-  // ) {
-  //   throw new HttpException(
-  //     'Não é permitido registrar reservas em datas anteriores à data atual.',
-  //     HttpStatus.EXPECTATION_FAILED,
-  //   );
-  // }
+  if (dateTime_Start >= dateTime_End) {
+    throw new HttpException(
+      'A data/hora de início deve ser anterior à data/hora de fim.',
+      HttpStatus.BAD_REQUEST,
+    );
+  }
+
+  return {
+    dateTime_Start,
+    dateTime_End,
+  };
 }

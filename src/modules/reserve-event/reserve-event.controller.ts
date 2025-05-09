@@ -33,22 +33,14 @@ export class ReserveEventController {
   @ApiResponse({ status: 417, description: 'Datas inválidas' })
   @ApiResponse({ status: 500, description: 'Erro interno do servidor' })
   @ApiBearerAuth('access_token')
-  @CheckPolicies((ability: AppAbility) => ability.can(Action.Admin, 'all'))
+  @CheckPolicies((ability: AppAbility) => ability.can(Action.Control, 'all'))
+  @CheckPolicies((ability: AppAbility) => ability.can(Action.Manage, 'all'))
+  @CheckPolicies((ability: AppAbility) => ability.can(Action.User, 'all'))
   create(
     @Body() createReserveEventDto: CreateReserveEventDto,
     @Req() req: Request,
   ) {
     return this.reserveEventService.create(createReserveEventDto, req);
-  }
-
-  @Get('reserves')
-  @ApiResponse({ status: 200, description: 'Reservas listadas com sucesso' })
-  @ApiResponse({ status: 400, description: 'Erro ao criar reserva' })
-  @ApiResponse({ status: 500, description: 'Erro interno do servidor' })
-  @ApiBearerAuth('access_token')
-  @CheckPolicies((ability: AppAbility) => ability.can(Action.Admin, 'all'))
-  findAll() {
-    return this.reserveEventService.findAll();
   }
 
   @Get(':id')
@@ -69,7 +61,9 @@ export class ReserveEventController {
   @ApiResponse({ status: 417, description: 'Datas inválidas' })
   @ApiResponse({ status: 500, description: 'Erro interno do servidor' })
   @ApiBearerAuth('access_token')
-  @CheckPolicies((ability: AppAbility) => ability.can(Action.Admin, 'all'))
+  @CheckPolicies((ability: AppAbility) => ability.can(Action.Control, 'all'))
+  @CheckPolicies((ability: AppAbility) => ability.can(Action.Manage, 'all'))
+  @CheckPolicies((ability: AppAbility) => ability.can(Action.User, 'all'))
   update(
     @Param('id') id: string,
     @Req() req: Request,
@@ -84,7 +78,8 @@ export class ReserveEventController {
   @ApiResponse({ status: 404, description: 'Reserva não encontrada' })
   @ApiResponse({ status: 500, description: 'Erro interno do servidor' })
   @ApiBearerAuth('access_token')
-  @CheckPolicies((ability: AppAbility) => ability.can(Action.Admin, 'all'))
+  @CheckPolicies((ability: AppAbility) => ability.can(Action.Control, 'all'))
+  @CheckPolicies((ability: AppAbility) => ability.can(Action.Manage, 'all'))
   remove(@Param('id') id: string) {
     return this.reserveEventService.remove(id);
   }

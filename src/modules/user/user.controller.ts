@@ -1,10 +1,4 @@
-import {
-  Controller,
-  Delete,
-  Get,
-  Param,
-  UseGuards,
-} from '@nestjs/common';
+import { Controller, Delete, Get, Param, UseGuards } from '@nestjs/common';
 import { UserService } from './user.service';
 import { PoliciesGuard } from '../casl/guards/policies.guard';
 import { Public } from '../auth/skipAuth/skipAuth';
@@ -17,10 +11,7 @@ import { ApiBearerAuth, ApiResponse, ApiTags } from '@nestjs/swagger';
 @UseGuards(PoliciesGuard)
 @Controller('user')
 export class UserController {
-  constructor(
-    private readonly userSvc: UserService,
-  ) {}
-
+  constructor(private readonly userSvc: UserService) {}
 
   // Lembrar que é para apagar após termino de teste e do site em si
   @Get()
@@ -39,7 +30,7 @@ export class UserController {
   @ApiResponse({ status: 404, description: 'Usuário não encontrado' })
   @ApiResponse({ status: 500, description: 'Erro interno do servidor' })
   @ApiBearerAuth('access_token')
-  @CheckPolicies((ability: AppAbility) => ability.can(Action.General, 'all'))
+  @CheckPolicies((ability: AppAbility) => ability.can(Action.Control, 'all'))
   delete(@Param('id') id: string) {
     return this.userSvc.delete(id);
   }

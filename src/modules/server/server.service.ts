@@ -12,19 +12,21 @@ export class ServerService {
   constructor(private readonly prisma: PrismaService) {}
 
   async create(body: CreateServerDto) {
-    if (!body.function_Server) {
+    if (!body.roleInInstitution) {
       throw new HttpException(
         'Digite sua função',
         HttpStatus.EXPECTATION_FAILED,
       );
     }
-    const upperFunctionServer = body.function_Server.toUpperCase();
 
     const userRegistered = await this.prisma.user.findFirst({
       where: {
         AND: [
           {
-            OR: [{ identification: body.registration }, { email: body.email }],
+            OR: [
+              { identification: body.identification },
+              { email: body.email },
+            ],
           },
         ],
       },
@@ -44,7 +46,7 @@ export class ServerService {
       );
     }
 
-    if (body.registration.length < 6 || body.registration.length > 8) {
+    if (body.identification.length < 6 || body.identification.length > 8) {
       throw new HttpException(
         'É necessário que sua mátricula tenha entre 6 e 8 caracteres',
         HttpStatus.EXPECTATION_FAILED,
@@ -65,13 +67,13 @@ export class ServerService {
       const registerServer = await this.prisma.user.create({
         data: {
           name: body.name,
-          identification: body.registration,
+          identification: body.identification,
           email: body.email,
           password: hashedPassword,
-          type_User: 'SERVIDOR',
+          typeUser: 'SERVIDOR',
           server: {
             create: {
-              funtion_Server: upperFunctionServer,
+              roleInInstitution: body.roleInInstitution,
             },
           },
         },
@@ -81,13 +83,13 @@ export class ServerService {
       });
 
       if (
-        registerServer.type_User == 'SERVIDOR' &&
-        registerServer.server?.funtion_Server == 'PROFESSOR DE EDUCAÇÃO FÍSICA'
+        registerServer.typeUser == 'SERVIDOR' &&
+        registerServer.server?.roleInInstitution == 'PROFESSOR_EDUCACAO_FISICA'
       ) {
         await this.prisma.user.update({
           where: { id: registerServer.id },
           data: {
-            role: 'ADMIN',
+            role: 'PE_ADMIN',
           },
         });
       }
@@ -108,7 +110,7 @@ export class ServerService {
               status: true,
             },
           },
-          funtion_Server: true,
+          roleInInstitution: true,
         },
       });
 
@@ -130,7 +132,7 @@ export class ServerService {
           status: true,
           server: {
             select: {
-              funtion_Server: true,
+              roleInInstitution: true,
             },
           },
         },
@@ -149,8 +151,6 @@ export class ServerService {
 
     await validateUser(userId);
 
-    const upperFunctionServer = body.function_Server;
-
     const randomPass = randomInt(10, 16);
     const hashedPassword = await bcrypt.hash(
       body.password as string,
@@ -165,7 +165,7 @@ export class ServerService {
           password: hashedPassword,
           server: {
             update: {
-              funtion_Server: upperFunctionServer,
+              roleInInstitution: body.roleInInstitution,
             },
           },
         },
@@ -176,7 +176,7 @@ export class ServerService {
           identification: true,
           server: {
             select: {
-              funtion_Server: true,
+              roleInInstitution: true,
             },
           },
         },
