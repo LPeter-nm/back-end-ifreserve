@@ -9,6 +9,7 @@ import { randomInt } from 'crypto';
 import { Request } from 'express';
 import { handleAsyncOperation } from 'src/validations/prismaValidate';
 import { validateUser } from 'src/validations/authValidate';
+import { PaginationDto } from 'src/common/dto/paginationDto';
 
 @Injectable()
 export class UserExternalService {
@@ -76,9 +77,15 @@ export class UserExternalService {
     });
   }
 
-  async findAll() {
+  async findAll(paginationDto: PaginationDto) {
+    const { page, pageSize } = paginationDto;
+    const offSet = (page - 1) * pageSize;
+
     return handleAsyncOperation(async () => {
       const users = await this.prisma.userExternal.findMany({
+        skip: offSet,
+        take: Number(pageSize),
+        orderBy: { id: 'desc' },
         select: {
           user: {
             select: {
@@ -95,7 +102,13 @@ export class UserExternalService {
         },
       });
 
-      return users;
+      const totalExternal = await this.prisma.userExternal.count();
+
+      return {
+        data: users,
+        totaPages: Math.ceil(totalExternal / pageSize),
+        currentPage: page,
+      };
     });
   }
 

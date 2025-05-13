@@ -17,6 +17,11 @@ import { Public } from '../auth/skipAuth/skipAuth';
 import { Request } from 'express';
 import { PutCommentsDto } from './dto/reserveDto';
 
+const canAccessReserves = (ability: AppAbility) =>
+  ability.can(Action.Control, 'all') ||
+  ability.can(Action.Manage, 'all') ||
+  ability.can(Action.User, 'all');
+
 @ApiTags('Reserva')
 @UseGuards(PoliciesGuard)
 @Controller('reserve')
@@ -39,9 +44,7 @@ export class ReserveController {
   @ApiResponse({ status: 400, description: 'Erro listar reservas' })
   @ApiResponse({ status: 500, description: 'Erro interno do servidor' })
   @ApiBearerAuth('access_token')
-  @CheckPolicies((ability: AppAbility) => ability.can(Action.Control, 'all'))
-  @CheckPolicies((ability: AppAbility) => ability.can(Action.Manage, 'all'))
-  @CheckPolicies((ability: AppAbility) => ability.can(Action.User, 'all'))
+  @CheckPolicies(canAccessReserves)
   findAllUser(@Req() req: Request) {
     return this.reserveService.findAllUser(req);
   }

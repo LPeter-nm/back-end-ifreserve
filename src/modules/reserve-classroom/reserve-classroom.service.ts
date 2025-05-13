@@ -36,7 +36,7 @@ export class ReserveClassroomService {
       const reserve = await this.prisma.reserve.create({
         data: {
           type_Reserve: 'AULA',
-          occurrence: body.ocurrence,
+          occurrence: body.occurrence,
           dateTimeStart: validateDate.dateTime_Start,
           dateTimeEnd: validateDate.dateTime_End,
           userId,
@@ -110,16 +110,12 @@ export class ReserveClassroomService {
     });
   }
 
-  async update(
-    classroomId: string,
-    req: Request,
-    body: UpdateReserveClassroomDto,
-  ) {
+  async update(id: string, req: Request, body: UpdateReserveClassroomDto) {
     const userId = req.user?.id as string;
     await validateUser(userId);
 
-    const classroomFind = await this.prisma.classroom.findFirst({
-      where: { id: classroomId },
+    const classroomFind = await this.prisma.reserve.findFirst({
+      where: { id: id },
     });
 
     if (!classroomFind) {
@@ -131,30 +127,27 @@ export class ReserveClassroomService {
       body.dateTimeEnd,
     );
 
-    await checkConflictingReserves(body.dateTimeStart, body.dateTimeEnd);
+    await checkConflictingReserves(body.dateTimeStart, body.dateTimeEnd, id);
 
     return handleAsyncOperation(async () => {
-      const reserveUpdated = await this.prisma.classroom.update({
-        where: { id: classroomId },
+      const updatedReserve = await this.prisma.reserve.update({
+        where: { id: id },
         data: {
-          course: body.course,
-          matter: body.matter,
-          reserve: {
+          occurrence: body.occurrence,
+          dateTimeStart: validateDate.dateTime_Start,
+          dateTimeEnd: validateDate.dateTime_End,
+          classroom: {
             update: {
-              occurrence: body.ocurrence,
-              dateTimeStart: validateDate.dateTime_Start,
-              dateTimeEnd: validateDate.dateTime_End,
+              course: body.course,
+              matter: body.matter,
             },
           },
         },
         include: {
-          reserve: {
+          classroom: true,
+          user: {
             select: {
-              user: {
-                select: {
-                  name: true,
-                },
-              },
+              name: true,
             },
           },
         },
@@ -162,7 +155,7 @@ export class ReserveClassroomService {
 
       return {
         message: 'Reserva atualizada com sucesso',
-        reserveUpdated,
+        updatedReserve,
       };
     });
   }

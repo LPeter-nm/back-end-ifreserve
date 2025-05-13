@@ -1,4 +1,12 @@
-import { Controller, Get, Delete, Param, Req, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Delete,
+  Param,
+  Req,
+  UseGuards,
+  Patch,
+} from '@nestjs/common';
 import { NotificationService } from './notification.service';
 import { PoliciesGuard } from '../casl/guards/policies.guard';
 import { CheckPolicies } from '../casl/guards/policies.check';
@@ -26,6 +34,20 @@ export class NotificationController {
     return this.notificationService.findAll(req);
   }
 
+  @Patch(':id')
+  @ApiResponse({
+    status: 200,
+    description: 'Notificação atualizada com sucesso',
+  })
+  @ApiResponse({ status: 400, description: 'Erro ao atualizar notificação' })
+  @ApiResponse({ status: 404, description: 'Notificação não encontrada' })
+  @ApiResponse({ status: 500, description: 'Erro interno do servidor' })
+  @ApiBearerAuth('access_token')
+  @CheckPolicies((ability: AppAbility) => ability.can(Action.User, 'all'))
+  updateRead(@Param('id') id: string) {
+    return this.notificationService.updateRead(id);
+  }
+
   @Delete(':id')
   @ApiResponse({
     status: 200,
@@ -49,7 +71,7 @@ export class NotificationController {
   @ApiResponse({ status: 500, description: 'Erro interno do servidor' })
   @ApiBearerAuth('access_token')
   @CheckPolicies((ability: AppAbility) => ability.can(Action.User, 'all'))
-  removeAll(req: Request) {
+  removeAll(@Req() req: Request) {
     return this.notificationService.removeAll(req);
   }
 }

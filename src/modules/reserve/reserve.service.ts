@@ -27,8 +27,10 @@ export class ReserveService {
         include: {
           user: {
             select: {
+              id: true,
               name: true,
               role: true,
+              typeUser: true,
             },
           },
           sport: true,
@@ -48,8 +50,10 @@ export class ReserveService {
         include: {
           user: {
             select: {
+              id: true,
               name: true,
               role: true,
+              typeUser: true,
             },
           },
           sport: true,
@@ -130,10 +134,10 @@ export class ReserveService {
 
       await this.notificationService.create(
         'Reserva Confirmada',
-        `Sua reserva foi atualizada pelo servidor ${confirmedReserve.answeredBy}`,
+        `Sua reserva foi confirmada pelo servidor ${confirmedReserve.answeredBy}`,
         'RESERVA_CONFIRMADA' as TypeNotification,
         req,
-        undefined,
+        '/view-reserves',
         confirmedReserve.user.id,
       );
 
@@ -198,7 +202,7 @@ export class ReserveService {
         `Sua reserva foi recusada pelo servidor ${refusedReserve.answeredBy}`,
         'RESERVA_RECUSADA' as TypeNotification,
         req,
-        undefined,
+        '/view-reserves',
         refusedReserve.user.id,
       );
 

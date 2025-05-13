@@ -7,6 +7,7 @@ import {
   UseGuards,
   Req,
   Put,
+  Query,
 } from '@nestjs/common';
 import { UserExternalService } from './user-external.service';
 import {
@@ -20,6 +21,7 @@ import { Action } from '../casl/casl-ability.factory/actionDTO/casl-actionDTO';
 import { PoliciesGuard } from '../casl/guards/policies.guard';
 import { Request } from 'express';
 import { ApiBearerAuth, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { PaginationDto } from 'src/common/dto/paginationDto';
 
 @ApiTags('Usuário Externo')
 @UseGuards(PoliciesGuard)
@@ -60,8 +62,8 @@ export class UserExternalController {
   @ApiResponse({ status: 500, description: 'Erro interno do servidor' })
   @ApiBearerAuth('access_token')
   @CheckPolicies((ability: AppAbility) => ability.can(Action.Control, 'all'))
-  findAll() {
-    return this.userExternalService.findAll();
+  findAll(@Query() paginationDto: PaginationDto) {
+    return this.userExternalService.findAll(paginationDto);
   }
 
   @Get()

@@ -7,6 +7,7 @@ import {
   Delete,
   UseGuards,
   Req,
+  Query,
 } from '@nestjs/common';
 import { StudentService } from './student.service';
 import { CreateStudentDto, UpdateStudentDto } from './dto/studentDto';
@@ -17,6 +18,7 @@ import { CheckPolicies } from '../casl/guards/policies.check';
 import { AppAbility } from '../casl/casl-ability.factory/casl-ability.factory';
 import { Action } from '../casl/casl-ability.factory/actionDTO/casl-actionDTO';
 import { Request } from 'express';
+import { PaginationDto } from 'src/common/dto/paginationDto';
 
 @ApiTags('Aluno')
 @UseGuards(PoliciesGuard)
@@ -60,8 +62,8 @@ export class StudentController {
   @ApiResponse({ status: 500, description: 'Erro interno do servidor' })
   @ApiBearerAuth('access_token')
   @CheckPolicies((ability: AppAbility) => ability.can(Action.Control, 'all'))
-  findAll() {
-    return this.studentService.findAll();
+  findAll(@Query() paginationDto: PaginationDto) {
+    return this.studentService.findAll(paginationDto);
   }
 
   @Get()

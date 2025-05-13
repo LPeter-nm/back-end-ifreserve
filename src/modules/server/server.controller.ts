@@ -7,6 +7,7 @@ import {
   Delete,
   Req,
   UseGuards,
+  Query,
 } from '@nestjs/common';
 import { ServerService } from './server.service';
 import { CreateServerDto, UpdateServerDto } from './dto/serverDto';
@@ -17,6 +18,7 @@ import { Public } from '../auth/skipAuth/skipAuth';
 import { CheckPolicies } from '../casl/guards/policies.check';
 import { AppAbility } from '../casl/casl-ability.factory/casl-ability.factory';
 import { Action } from '../casl/casl-ability.factory/actionDTO/casl-actionDTO';
+import { PaginationDto } from 'src/common/dto/paginationDto';
 
 @ApiTags('Servidor')
 @UseGuards(PoliciesGuard)
@@ -60,8 +62,8 @@ export class ServerController {
   @ApiResponse({ status: 500, description: 'Erro interno do servidor' })
   @ApiBearerAuth('access_token')
   @CheckPolicies((ability: AppAbility) => ability.can(Action.Control, 'all'))
-  findAll() {
-    return this.serverService.findAll();
+  findAll(@Query() paginationDto: PaginationDto) {
+    return this.serverService.findAll(paginationDto);
   }
 
   @Get()

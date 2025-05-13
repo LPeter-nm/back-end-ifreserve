@@ -7,11 +7,12 @@ const prisma = new PrismaClient();
 export async function checkConflictingReserves(
   dateTimeStart: string,
   dateTimeEnd: string,
+  reserveId?: string,
 ) {
   const dateTime_Start = parseDateTime(dateTimeStart);
   const dateTime_End = parseDateTime(dateTimeEnd);
 
-  const conflictingReserves = await prisma.reserve.findMany({
+  const conflictingReserves = await prisma.reserve.findFirst({
     where: {
       AND: [
         { OR: [{ status: 'CADASTRADO' }, { status: 'CONFIRMADA' }] },
@@ -38,7 +39,7 @@ export async function checkConflictingReserves(
     },
   });
 
-  if (conflictingReserves.length > 0) {
+  if (conflictingReserves && reserveId != conflictingReserves?.id) {
     throw new HttpException(
       'Já existe uma reserva para o mesmo horário e data',
       HttpStatus.CONFLICT,

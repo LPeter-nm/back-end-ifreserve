@@ -41,6 +41,30 @@ export class NotificationService {
     });
   }
 
+  async updateRead(id: string) {
+    const notificationFind = await this.prisma.notification.findFirst({
+      where: { id },
+    });
+
+    if (!notificationFind) {
+      throw new HttpException(
+        'Notificação não encontrada',
+        HttpStatus.NOT_FOUND,
+      );
+    }
+
+    return handleAsyncOperation(async () => {
+      await this.prisma.notification.update({
+        where: { id },
+        data: {
+          isRead: true,
+        },
+      });
+
+      return { message: 'Notificação visualizada' };
+    });
+  }
+
   async remove(id: string) {
     return this.prisma.$transaction(async (prisma) => {
       const notification = await this.prisma.notification.findUnique({

@@ -22,7 +22,7 @@ export class CreateReserveClassroomDto {
     description: 'Ocorrência da reserva',
   })
   @IsNotEmpty()
-  ocurrence: Occurrence;
+  occurrence: Occurrence;
 
   @ApiProperty({
     example: '26/05/2025, 14:25',
@@ -56,7 +56,7 @@ export class UpdateReserveClassroomDto {
     example: 'SEMANALMENTE',
     description: 'Ocorrência da reserva',
   })
-  ocurrence?: Occurrence;
+  occurrence?: Occurrence;
 
   @ApiProperty({
     example: '26/05/2025, 14:25',

@@ -6,6 +6,7 @@ import { randomInt } from 'crypto';
 import * as bcrypt from 'bcryptjs';
 import { Request } from 'express';
 import { validateUser } from 'src/validations/authValidate';
+import { PaginationDto } from 'src/common/dto/paginationDto';
 
 @Injectable()
 export class ServerService {
@@ -98,12 +99,19 @@ export class ServerService {
     });
   }
 
-  findAll() {
+  findAll(paginationDto: PaginationDto) {
+    const { page, pageSize } = paginationDto;
+    const offSet = (page - 1) * pageSize;
+
     return handleAsyncOperation(async () => {
       const servers = await this.prisma.server.findMany({
+        skip: offSet,
+        take: Number(pageSize),
+        orderBy: { id: 'desc' },
         select: {
           user: {
             select: {
+              id: true,
               name: true,
               email: true,
               identification: true,
@@ -114,7 +122,13 @@ export class ServerService {
         },
       });
 
-      return servers;
+      const totalServers = await this.prisma.server.count();
+
+      return {
+        data: servers,
+        totalPages: Math.ceil(totalServers / pageSize),
+        currentPage: page,
+      };
     });
   }
 

@@ -49,7 +49,7 @@ export class ReserveSportService {
     }
 
     return handleAsyncOperation(async () => {
-      const reserveRequest = await this.prisma.reserve.create({
+      const reserve = await this.prisma.reserve.create({
         data: {
           type_Reserve: 'OFICIO',
           occurrence: body.occurrence,
@@ -77,11 +77,11 @@ export class ReserveSportService {
       });
 
       if (
-        reserveRequest.user.role === 'PE_ADMIN' ||
-        reserveRequest.user.role === 'SISTEMA_ADMIN'
+        reserve.user.role === 'PE_ADMIN' ||
+        reserve.user.role === 'SISTEMA_ADMIN'
       ) {
         const updateRegistered = await this.prisma.reserve.update({
-          where: { id: reserveRequest.id },
+          where: { id: reserve.id },
           data: {
             status: 'CADASTRADO',
           },
@@ -94,7 +94,7 @@ export class ReserveSportService {
       } else {
         return {
           message: 'Reserva solicitada, aguarde confirmação ou recusa da mesma',
-          reserveRequest,
+          reserve,
         };
       }
     });
@@ -128,12 +128,12 @@ export class ReserveSportService {
     });
   }
 
-  async update(req: Request, sportId: string, body: UpdateReserveSportDto) {
+  async update(req: Request, id: string, body: UpdateReserveSportDto) {
     const userId = req.user?.id as string;
     await validateUser(userId, 'Você só pode atualizar suas reservas');
 
-    const reserve = await this.prisma.sport.findFirst({
-      where: { id: sportId },
+    const reserve = await this.prisma.reserve.findFirst({
+      where: { id: id },
     });
 
     if (!reserve) {
@@ -145,59 +145,52 @@ export class ReserveSportService {
       body.dateTimeEnd,
     );
 
-    await checkConflictingReserves(body.dateTimeStart, body.dateTimeEnd);
+    await checkConflictingReserves(body.dateTimeStart, body.dateTimeEnd, id);
 
     return handleAsyncOperation(async () => {
-      const updatedReserve = await this.prisma.sport.update({
-        where: { id: sportId },
+      const updatedReserve = await this.prisma.reserve.update({
+        where: { id: id },
         data: {
-          typePractice: body.typePractice,
-          numberParticipants: body.numberParticipants,
-          participants: body.participants,
-          requestEquipment: body.requestEquipment,
-          reserve: {
+          occurrence: body.occurrence,
+          dateTimeStart: validateDate.dateTime_Start,
+          dateTimeEnd: validateDate.dateTime_End,
+
+          sport: {
             update: {
-              occurrence: body.occurrence,
-              dateTimeStart: validateDate.dateTime_Start,
-              dateTimeEnd: validateDate.dateTime_End,
+              typePractice: body.typePractice,
+              numberParticipants: body.numberParticipants,
+              participants: body.participants,
+              requestEquipment: body.requestEquipment,
             },
           },
         },
         include: {
-          reserve: {
+          sport: true,
+          user: {
             select: {
-              user: {
-                select: {
-                  name: true,
-                  role: true,
-                },
-              },
+              name: true,
+              role: true,
             },
           },
         },
       });
 
       if (
-        updatedReserve.reserve.user.role === 'PE_ADMIN' ||
-        updatedReserve.reserve.user.role === 'SISTEMA_ADMIN'
+        updatedReserve.user.role === 'PE_ADMIN' ||
+        updatedReserve.user.role === 'SISTEMA_ADMIN'
       ) {
-        const updateRegistered = await this.prisma.reserve.update({
+        await this.prisma.reserve.update({
           where: { id: updatedReserve.id },
           data: {
             status: 'CADASTRADO',
           },
         });
-
-        return {
-          message: 'Reserva atualizada com sucesso',
-          updateRegistered,
-        };
-      } else {
-        return {
-          message: 'Reserva atualizada com sucesso',
-          updatedReserve,
-        };
       }
+
+      return {
+        message: 'Reserva atualizada com sucesso',
+        updatedReserve,
+      };
     });
   }
 

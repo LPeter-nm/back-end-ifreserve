@@ -23,14 +23,17 @@ export function validateReservationDates(
     );
   }
 
-  if (dateTime_Start < currentDate || dateTime_End < currentDate) {
+  if (
+    dateTime_Start.getTime() < currentDate.getTime() ||
+    dateTime_End.getTime() < currentDate.getTime()
+  ) {
     throw new HttpException(
       'Não é permitido registrar reservas em datas anteriores à data atual.',
       HttpStatus.EXPECTATION_FAILED,
     );
   }
 
-  if (dateTime_Start >= dateTime_End) {
+  if (dateTime_Start.getTime() >= dateTime_End.getTime()) {
     throw new HttpException(
       'A data/hora de início deve ser anterior à data/hora de fim.',
       HttpStatus.BAD_REQUEST,

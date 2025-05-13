@@ -102,13 +102,13 @@ export class ReserveEventService {
     });
   }
 
-  async update(eventId: string, req: Request, body: UpdateReserveEventDto) {
+  async update(id: string, req: Request, body: UpdateReserveEventDto) {
     const userId = req.user?.id as string;
     await validateUser(userId, 'Você só pode atualizar suas reservas');
 
-    const reserveFind = await this.prisma.event.findFirst({
+    const reserveFind = await this.prisma.reserve.findFirst({
       where: {
-        id: eventId,
+        id: id,
       },
     });
 
@@ -121,39 +121,38 @@ export class ReserveEventService {
       body.dateTimeEnd,
     );
 
-    await checkConflictingReserves(body.dateTimeStart, body.dateTimeEnd);
+    await checkConflictingReserves(body.dateTimeStart, body.dateTimeEnd, id);
 
     return handleAsyncOperation(async () => {
-      const reserveUpdated = await this.prisma.event.update({
-        where: { id: eventId },
+      const updatedReserve = await this.prisma.reserve.update({
+        where: { id: id },
         data: {
-          name: body.name,
-          description: body.description,
-          location: body.location,
-          reserve: {
+          occurrence: body.occurrence,
+          dateTimeStart: validateDate.dateTime_Start,
+          dateTimeEnd: validateDate.dateTime_End,
+          event: {
             update: {
-              occurrence: body.occurrence,
-              dateTimeStart: validateDate.dateTime_Start,
-              dateTimeEnd: validateDate.dateTime_End,
+              name: body.name,
+              description: body.description,
+              location: body.location,
             },
           },
         },
         include: {
-          reserve: {
+          event: true,
+
+          user: {
             select: {
-              user: {
-                select: {
-                  name: true,
-                },
-              },
+              name: true,
             },
           },
         },
       });
 
       return {
-        nameUser: reserveUpdated.reserve.user.name,
-        reserveUpdated,
+        message: 'Reserva atualizada com sucesso',
+        nameUser: updatedReserve.user.name,
+        updatedReserve,
       };
     });
   }
