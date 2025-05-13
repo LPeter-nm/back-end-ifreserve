@@ -3,7 +3,6 @@ import {
   CreateReserveClassroomDto,
   UpdateReserveClassroomDto,
 } from './dto/classroomDto';
-import { PutCommentsDto } from '../reserve/dto/reserveDto';
 import { PrismaService } from 'src/database/PrismaService';
 import { Request } from 'express';
 import { validateUser } from 'src/validations/authValidate';
@@ -11,7 +10,6 @@ import { checkConflictingReserves } from 'src/validations/datetimeValidate';
 import { handleAsyncOperation } from 'src/validations/prismaValidate';
 import { validateReservationDates } from 'src/validations/reservationDateValidate';
 import { NotificationService } from '../notification/notification.service';
-import { TypeNotification } from '../notification/dto/notificationDto';
 
 @Injectable()
 export class ReserveClassroomService {
