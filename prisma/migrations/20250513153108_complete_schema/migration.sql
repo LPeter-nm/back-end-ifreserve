@@ -14,7 +14,7 @@ CREATE TYPE "StatusUser" AS ENUM ('ATIVO', 'INATIVO');
 CREATE TYPE "StatusRestore" AS ENUM ('CONCLUIDO', 'PENDENTE');
 
 -- CreateEnum
-CREATE TYPE "StatusReserve" AS ENUM ('PENDENTE', 'CONFIRMADA', 'RECUSADA', 'CANCELADA');
+CREATE TYPE "StatusReserve" AS ENUM ('CADASTRADO', 'PENDENTE', 'CONFIRMADA', 'RECUSADA', 'CANCELADA');
 
 -- CreateEnum
 CREATE TYPE "TypeReserve" AS ENUM ('OFICIO', 'EVENTO', 'AULA');
@@ -26,7 +26,7 @@ CREATE TYPE "TypePractice" AS ENUM ('TREINO', 'RECREACAO', 'AMISTOSO');
 CREATE TYPE "Occurrence" AS ENUM ('EVENTO_UNICO', 'SEMANALMENTE');
 
 -- CreateEnum
-CREATE TYPE "NotificationType" AS ENUM ('RESERVA_SOLICITADA', 'RESERVA_CONFIRMADA', 'RESERVA_RECUSADA', 'RELATORIO_PENDENTE', 'RELATORIO_REALIZADO', 'AULA_CADASTRADA', 'EVENTO_CADASTRADO');
+CREATE TYPE "NotificationType" AS ENUM ('RESERVA_CONFIRMADA', 'RESERVA_RECUSADA', 'RELATORIO_PENDENTE');
 
 -- CreateTable
 CREATE TABLE "user" (
@@ -96,6 +96,8 @@ CREATE TABLE "reserve" (
     "occurrence" "Occurrence" NOT NULL,
     "dateTimeStart" TIMESTAMP(3) NOT NULL,
     "dateTimeEnd" TIMESTAMP(3) NOT NULL,
+    "answeredBy" TEXT,
+    "comments" TEXT,
     "userId" TEXT NOT NULL,
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
@@ -109,8 +111,6 @@ CREATE TABLE "Sport" (
     "numberParticipants" INTEGER NOT NULL,
     "participants" TEXT NOT NULL,
     "requestEquipment" TEXT NOT NULL,
-    "answeredBy" TEXT,
-    "comments" TEXT,
     "completed" BOOLEAN,
     "reserveId" TEXT NOT NULL,
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -156,7 +156,7 @@ CREATE TABLE "Report" (
     "dateUsed" TIMESTAMP(3) NOT NULL,
     "generalComments" TEXT,
     "commentsAdmin" TEXT,
-    "statusReadAmdmin" BOOLEAN NOT NULL DEFAULT false,
+    "statusReadAdmin" BOOLEAN NOT NULL DEFAULT false,
     "sportId" TEXT NOT NULL,
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
