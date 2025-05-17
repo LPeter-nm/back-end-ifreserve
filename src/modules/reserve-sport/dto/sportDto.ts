@@ -33,7 +33,7 @@ export class CreateReserveSportDto {
 
   @ApiProperty({ example: '12', description: 'Número de participantes' })
   @IsNotEmpty()
-  numberParticipants: number;
+  numberParticipants: string;
 
   @ApiProperty({
     example: 'Fulano 1 - 00000EXP.TMN00000; Fulano 2 - 000.000.000-00; ...',
@@ -48,6 +48,14 @@ export class CreateReserveSportDto {
   })
   @IsNotEmpty()
   requestEquipment: string;
+
+  @ApiProperty({
+    description: 'Arquivo em PDF',
+    type: 'string',
+    format: 'binary',
+    required: false,
+  })
+  pdfFile?: any;
 }
 
 export class UpdateReserveSportDto {

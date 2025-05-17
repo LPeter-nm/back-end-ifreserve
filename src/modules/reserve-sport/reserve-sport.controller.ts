@@ -8,6 +8,8 @@ import {
   Delete,
   Req,
   UseGuards,
+  UseInterceptors,
+  UploadedFile,
 } from '@nestjs/common';
 import { ReserveSportService } from './reserve-sport.service';
 import { CreateReserveSportDto, UpdateReserveSportDto } from './dto/sportDto';
@@ -18,6 +20,9 @@ import { AppAbility } from '../casl/casl-ability.factory/casl-ability.factory';
 import { Action } from '../casl/casl-ability.factory/actionDTO/casl-actionDTO';
 import { Public } from '../auth/skipAuth/skipAuth';
 import { ApiBearerAuth, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { diskStorage } from 'multer';
+import { extname } from 'path';
 
 @ApiTags('Reserva - Ofício')
 @UseGuards(PoliciesGuard)
@@ -35,8 +40,33 @@ export class ReserveSportController {
   @ApiBearerAuth('access_token')
   @CheckPolicies((ability: AppAbility) => ability.can(Action.User, 'all'))
   @CheckPolicies((ability: AppAbility) => ability.can(Action.Manage, 'all'))
-  create(@Body() body: CreateReserveSportDto, @Req() req: Request) {
-    return this.reserveSportService.create(body, req);
+  @UseInterceptors(
+    FileInterceptor('pdfFile', {
+      storage: diskStorage({
+        destination: './uploads/sports',
+        filename: (req, file, cb) => {
+          const randomName = Array(32)
+            .fill(null)
+            .map(() => Math.round(Math.random() * 16).toString(16))
+            .join('');
+          return cb(null, `${randomName}${extname(file.originalname)}`);
+        },
+      }),
+      fileFilter: (req, file, cb) => {
+        if (file.mimetype === 'application/pdf') {
+          cb(null, true);
+        } else {
+          cb(new Error('Apenas arquivos PDF são permitidos'), false);
+        }
+      },
+    }),
+  )
+  async create(
+    @Body() body: CreateReserveSportDto,
+    @UploadedFile() pdfFile: Express.Multer.File,
+    @Req() req: Request,
+  ) {
+    return this.reserveSportService.create(body, req, pdfFile);
   }
 
   @Get(':sportId')
@@ -48,6 +78,14 @@ export class ReserveSportController {
     return this.reserveSportService.findOne(sportId);
   }
 
+  @Patch(':id/upload')
+  @UseInterceptors(FileInterceptor('pdfFile'))
+  async uploadFile(
+    @Param('id') id: string,
+    @UploadedFile() pdfFile: Express.Multer.File,
+  ) {
+    return this.reserveSportService.addFileToReserve(id, pdfFile);
+  }
   @Patch(':sportId')
   @ApiResponse({ status: 200, description: 'Reserva atualizada com sucesso' })
   @ApiResponse({ status: 400, description: 'Erro ao criar reserva' })

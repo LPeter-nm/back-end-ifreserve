@@ -14,7 +14,7 @@ export class AuthController {
   @ApiResponse({ status: 400, description: 'Credenciais inválidas' })
   @ApiResponse({ status: 404, description: 'Email não encontrado' })
   @ApiResponse({ status: 500, description: 'Erro interno do servidor' })
-  async create(@Body() body: CreateAuthDto) {
+  async logIn(@Body() body: CreateAuthDto) {
     return await this.authService.singIn(body.email, body.password);
   }
 }

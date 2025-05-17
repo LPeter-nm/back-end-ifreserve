@@ -3,6 +3,7 @@ import { AppModule } from './app.module';
 import * as express from 'express';
 import * as dotenv from 'dotenv';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import session from 'express-session';
 
 dotenv.config();
 
@@ -18,7 +19,9 @@ async function bootstrap() {
     allowedHeaders: ['Content-Type', 'Authorization'],
     credentials: true, // se estiver usando cookies/tokens
   });
-
+  // main.ts
+  app.use(express.json({ limit: '10mb' }));
+  app.use(express.urlencoded({ extended: true, limit: '10mb' }));
   const config = new DocumentBuilder()
 
     .setTitle('API IFReserve')

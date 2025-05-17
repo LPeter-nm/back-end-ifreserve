@@ -1,4 +1,9 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import {
+  HttpException,
+  HttpStatus,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { CreateReserveSportDto, UpdateReserveSportDto } from './dto/sportDto';
 import { PrismaService } from 'src/database/PrismaService';
 import { Request } from 'express';
@@ -6,8 +11,13 @@ import { handleAsyncOperation } from 'src/validations/prismaValidate';
 import { validateUser } from 'src/validations/authValidate';
 import { validateReservationDates } from 'src/validations/reservationDateValidate';
 import { NotificationService } from '../notification/notification.service';
+// Importe diretamente do módulo promises
+import { writeFile, mkdir } from 'fs/promises';
+// ou alternativamente
+import * as fs from 'fs/promises';
 
 import { checkConflictingReserves } from 'src/validations/datetimeValidate';
+import path from 'path';
 
 @Injectable()
 export class ReserveSportService {
@@ -16,7 +26,11 @@ export class ReserveSportService {
     private readonly notificationService: NotificationService,
   ) {}
 
-  async create(body: CreateReserveSportDto, req: Request) {
+  async create(
+    body: CreateReserveSportDto,
+    req: Request,
+    pdfFile?: Express.Multer.File,
+  ) {
     const userId = req.user?.id as string;
 
     await validateUser(userId);
@@ -59,9 +73,11 @@ export class ReserveSportService {
           sport: {
             create: {
               typePractice: body.typePractice,
-              numberParticipants: body.numberParticipants,
+              numberParticipants: Number(body.numberParticipants),
               participants: body.participants,
               requestEquipment: body.requestEquipment,
+              pdfUrl: pdfFile?.path,
+              pdfName: pdfFile?.originalname,
             },
           },
         },
@@ -97,6 +113,37 @@ export class ReserveSportService {
           reserve,
         };
       }
+    });
+  }
+
+  async addFileToReserve(id: string, pdfFile: Express.Multer.File) {
+    // 1. Verifica se a reserva existe
+    const reserve = await this.prisma.reserve.findUnique({
+      where: { id },
+      include: { sport: true },
+    });
+
+    if (!reserve) {
+      throw new NotFoundException('Reserva não encontrada');
+    }
+
+    // 2. Cria o diretório se não existir
+    const uploadDir = './uploads/sports';
+    await fs.mkdir(uploadDir, { recursive: true });
+
+    // 3. Define o caminho do arquivo (mantendo sua lógica original)
+    const filePath = path.join(uploadDir, `${id}-${pdfFile.originalname}`);
+
+    // 4. Salva o arquivo (usando promises corretamente)
+    await fs.writeFile(filePath, pdfFile.buffer);
+
+    // 5. Atualiza no banco de dados (igual ao seu original)
+    return this.prisma.sport.update({
+      where: { reserveId: id },
+      data: {
+        pdfUrl: filePath,
+        pdfName: pdfFile.originalname,
+      },
     });
   }
 
@@ -158,7 +205,7 @@ export class ReserveSportService {
           sport: {
             update: {
               typePractice: body.typePractice,
-              numberParticipants: body.numberParticipants,
+              numberParticipants: Number(body.numberParticipants),
               participants: body.participants,
               requestEquipment: body.requestEquipment,
             },

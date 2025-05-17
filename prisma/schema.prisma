@@ -179,6 +179,8 @@ model Sport {
   numberParticipants Int 
   participants String 
   requestEquipment String
+  pdfUrl String?  
+  pdfName String? 
   
   completed Boolean? // Se true o relatório estará pendente para realização 
 
