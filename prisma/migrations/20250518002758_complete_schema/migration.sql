@@ -111,6 +111,8 @@ CREATE TABLE "Sport" (
     "numberParticipants" INTEGER NOT NULL,
     "participants" TEXT NOT NULL,
     "requestEquipment" TEXT NOT NULL,
+    "pdfUrl" TEXT,
+    "pdfName" TEXT,
     "completed" BOOLEAN,
     "reserveId" TEXT NOT NULL,
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
