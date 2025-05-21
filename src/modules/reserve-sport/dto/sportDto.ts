@@ -33,7 +33,7 @@ export class CreateReserveSportDto {
 
   @ApiProperty({ example: '12', description: 'Número de participantes' })
   @IsNotEmpty()
-  numberParticipants: string;
+  numberParticipants: number;
 
   @ApiProperty({
     example: 'Fulano 1 - 00000EXP.TMN00000; Fulano 2 - 000.000.000-00; ...',

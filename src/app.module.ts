@@ -1,4 +1,4 @@
-import {  Module } from '@nestjs/common';
+import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { ScheduleModule } from '@nestjs/schedule';
 
@@ -50,4 +50,4 @@ import { ServerModule } from './modules/server/server.module';
   ],
   controllers: [],
 })
-export class AppModule{}
+export class AppModule {}

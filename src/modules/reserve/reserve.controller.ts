@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   Param,
   Patch,
@@ -120,5 +121,17 @@ export class ReserveController {
     @Body() body: PutCommentsDto,
   ) {
     return this.reserveService.updateRefused(req, id, body);
+  }
+
+  @Delete(':id')
+  @ApiResponse({ status: 200, description: 'Reserva deletada com sucesso' })
+  @ApiResponse({ status: 400, description: 'Erro ao deletar reserva' })
+  @ApiResponse({ status: 404, description: 'Reserva não encontrada' })
+  @ApiResponse({ status: 500, description: 'Erro interno do servidor' })
+  @ApiBearerAuth('access_token')
+  @CheckPolicies((ability: AppAbility) => ability.can(Action.Control, 'all'))
+  @CheckPolicies((ability: AppAbility) => ability.can(Action.Manage, 'all'))
+  remove(@Param('id') id: string) {
+    return this.reserveService.remove(id);
   }
 }

@@ -63,6 +63,28 @@ export class ReportService {
     });
   }
 
+  findAllUser(userId: string) {
+    return handleAsyncOperation(async () => {
+      const reports = await this.prisma.report.findMany({
+        where: { sport: { reserve: { userId } } },
+        select: {
+          id: true,
+          nameUser: true,
+          peopleAppear: true,
+          requestedEquipment: true,
+          generalComments: true,
+          courtCondition: true,
+          equipmentCondition: true,
+          timeUsed: true,
+          dateUsed: true,
+          sport: true,
+        },
+      });
+
+      return reports;
+    });
+  }
+
   findOne(id: string) {
     return handleAsyncOperation(async () => {
       const report = await this.prisma.report.findFirst({

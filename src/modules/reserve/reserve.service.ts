@@ -75,6 +75,7 @@ export class ReserveService {
         include: {
           user: {
             select: {
+              id: true,
               name: true,
               role: true,
             },
@@ -207,6 +208,25 @@ export class ReserveService {
       );
 
       return refusedReserve;
+    });
+  }
+
+  async remove(id: string) {
+    return this.prisma.$transaction(async (prisma) => {
+      const reserve = await prisma.reserve.findFirst({ where: { id } });
+
+      if (!reserve) {
+        throw new HttpException('Reserva não encontrada', HttpStatus.NOT_FOUND);
+      }
+
+      await prisma.reserve.delete({
+        where: { id },
+      });
+
+      return {
+        message: 'Reserva deletada com sucesso',
+        status: HttpStatus.NO_CONTENT,
+      };
     });
   }
 }

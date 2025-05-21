@@ -104,14 +104,14 @@ export class ReserveSportController {
     return this.reserveSportService.update(req, sportId, body);
   }
 
-  @Delete(':sportId')
+  @Delete(':id')
   @ApiResponse({ status: 200, description: 'Reserva deletada com sucesso' })
   @ApiResponse({ status: 400, description: 'Erro ao deletar reserva' })
   @ApiResponse({ status: 404, description: 'Reserva não encontrada' })
   @ApiResponse({ status: 500, description: 'Erro interno do servidor' })
   @CheckPolicies((ability: AppAbility) => ability.can(Action.Control, 'all'))
   @CheckPolicies((ability: AppAbility) => ability.can(Action.Manage, 'all'))
-  remove(@Param('sportId') sportId: string) {
-    return this.reserveSportService.remove(sportId);
+  remove(@Param('id') id: string) {
+    return this.reserveSportService.remove(id);
   }
 }

@@ -6,6 +6,8 @@ import { PrismaService } from 'src/database/PrismaService';
 import { UserModule } from '../user/user.module';
 import { JwtModule } from '@nestjs/jwt';
 import { CaslModule } from '../casl/casl.module';
+import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
+import { APP_GUARD } from '@nestjs/core';
 
 @Module({
   imports: [
@@ -18,8 +20,14 @@ import { CaslModule } from '../casl/casl.module';
         expiresIn: '1h',
       },
     }),
+    ThrottlerModule.forRoot(),
   ],
   controllers: [AuthController],
-  providers: [AuthService, UserService, PrismaService],
+  providers: [
+    AuthService,
+    UserService,
+    PrismaService,
+    { provide: APP_GUARD, useClass: ThrottlerGuard },
+  ],
 })
 export class AuthModule {}

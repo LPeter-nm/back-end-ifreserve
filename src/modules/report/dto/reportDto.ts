@@ -38,7 +38,7 @@ export class CreateReportDto {
   timeUsed: string;
 
   @ApiProperty({
-    example: '2025-03-15',
+    example: '15/05/2025',
     description: 'Data de uso da quadra',
   })
   @IsNotEmpty()
