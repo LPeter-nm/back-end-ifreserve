@@ -40,7 +40,7 @@ export class StudentService {
       );
     }
 
-    const identificationCheck = /^\d{5}TMN\.[A-Z]{3}\d{4}$/;
+    const identificationCheck = /^\d{5}[A-Z]{3}\.TMN\d{4}$/;
 
     if (!identificationCheck.test(body.identification)) {
       throw new HttpException(

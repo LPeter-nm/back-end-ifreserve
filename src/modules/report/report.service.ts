@@ -53,9 +53,19 @@ export class ReportService {
           generalComments: true,
           courtCondition: true,
           equipmentCondition: true,
+          commentsAdmin: true,
+          statusReadAdmin: true,
           timeUsed: true,
           dateUsed: true,
-          sport: true,
+          sport: {
+            include: {
+              reserve: {
+                select: {
+                  userId: true,
+                },
+              },
+            },
+          },
         },
       });
 
@@ -75,6 +85,8 @@ export class ReportService {
           generalComments: true,
           courtCondition: true,
           equipmentCondition: true,
+          commentsAdmin: true,
+          statusReadAdmin: true,
           timeUsed: true,
           dateUsed: true,
           sport: true,

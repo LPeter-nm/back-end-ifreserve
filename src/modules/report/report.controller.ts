@@ -49,8 +49,6 @@ export class ReportController {
   @ApiResponse({ status: 400, description: 'Erro ao listar relatórios' })
   @ApiResponse({ status: 500, description: 'Erro interno do servidor' })
   @ApiBearerAuth('access_token')
-  @CheckPolicies((ability: AppAbility) => ability.can(Action.Control, 'all'))
-  @CheckPolicies((ability: AppAbility) => ability.can(Action.Manage, 'all'))
   @CheckPolicies((ability: AppAbility) => ability.can(Action.User, 'all'))
   findAllUser(@Param('userId') userId: string) {
     return this.reportService.findAllUser(userId);

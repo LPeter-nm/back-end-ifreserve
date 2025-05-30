@@ -40,19 +40,16 @@ export class ReserveSportService {
       body.dateTimeEnd,
     );
 
-    const reserveCheck = await this.prisma.reserve.findFirst({
-      where: { userId },
-    });
     await checkConflictingReserves(body.dateTimeStart, body.dateTimeEnd);
 
-    if (reserveCheck) {
-      const pendingReserves = await this.prisma.reserve.findMany({
-        where: {
-          id: reserveCheck.id,
-        },
-      });
+    const findReserves = await this.prisma.reserve.findMany({
+      where: {
+        userId,
+      },
+    });
 
-      pendingReserves.map((ped) => {
+    if (findReserves) {
+      findReserves.map((ped) => {
         if (ped.status === 'PENDENTE') {
           throw new HttpException(
             'Você tem reservas ainda não resolvidas',

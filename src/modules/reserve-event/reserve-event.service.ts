@@ -23,6 +23,23 @@ export class ReserveEventService {
 
     await checkConflictingReserves(body.dateTimeStart, body.dateTimeEnd);
 
+    const findReserves = await this.prisma.reserve.findMany({
+      where: {
+        userId,
+      },
+    });
+
+    if (findReserves) {
+      findReserves.map((ped) => {
+        if (ped.status === 'PENDENTE') {
+          throw new HttpException(
+            'Você tem reservas ainda não resolvidas',
+            HttpStatus.CONFLICT,
+          );
+        }
+      });
+    }
+
     return handleAsyncOperation(async () => {
       const reserve = await this.prisma.reserve.create({
         data: {
