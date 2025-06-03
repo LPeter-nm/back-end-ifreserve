@@ -10,7 +10,7 @@ export class CreateStudentDto {
   name: string;
 
   @ApiProperty({
-    example: '00000TMN.EXP0000',
+    example: '00000EXP.TMN0000',
     description: 'Matrícula do aluno',
   })
   @Length(16, 16)

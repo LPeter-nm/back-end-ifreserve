@@ -44,7 +44,7 @@ export class StudentService {
 
     if (!identificationCheck.test(body.identification)) {
       throw new HttpException(
-        'O número de matrícula está no formato incorreto. Use o padrão: 00000TMN.XXX0000',
+        'O número de matrícula está no formato incorreto. Use o padrão: 00000XXX.TMN0000',
         HttpStatus.EXPECTATION_FAILED,
       );
     }

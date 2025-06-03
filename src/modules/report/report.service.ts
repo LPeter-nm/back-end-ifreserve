@@ -20,21 +20,39 @@ export class ReportService {
     return handleAsyncOperation(async () => {
       const sportExists = await this.prisma.sport.findUnique({
         where: { id: sportId },
+        include: {
+          reserve: true,
+        },
       });
 
       if (!sportExists) {
-        throw new HttpException('Esporte não encontrado', HttpStatus.NOT_FOUND);
+        throw new HttpException('Reserva não encontrada', HttpStatus.NOT_FOUND);
       }
 
       const userFound = await this.prisma.user.findFirst({
         where: { id: userId },
       });
 
+      if (sportExists.reserve.userId !== userId) {
+        throw new HttpException(
+          'Somente o usuário solicitante poderá realizar o relatório',
+          HttpStatus.EXPECTATION_FAILED,
+        );
+      }
+
       const report = await this.prisma.report.create({
         data: {
           ...body,
           nameUser: userFound?.name as string,
+          dateUsed: sportExists.reserve.dateTimeStart,
           sportId,
+        },
+      });
+
+      await this.prisma.report.update({
+        where: { id: report.id },
+        data: {
+          isSent: true,
         },
       });
 
@@ -54,6 +72,7 @@ export class ReportService {
           courtCondition: true,
           equipmentCondition: true,
           commentsAdmin: true,
+          isSent: true,
           statusReadAdmin: true,
           timeUsed: true,
           dateUsed: true,
@@ -73,7 +92,8 @@ export class ReportService {
     });
   }
 
-  findAllUser(userId: string) {
+  findAllUser(req: Request) {
+    const userId = req.user?.id as string;
     return handleAsyncOperation(async () => {
       const reports = await this.prisma.report.findMany({
         where: { sport: { reserve: { userId } } },
@@ -86,6 +106,7 @@ export class ReportService {
           courtCondition: true,
           equipmentCondition: true,
           commentsAdmin: true,
+          isSent: true,
           statusReadAdmin: true,
           timeUsed: true,
           dateUsed: true,
@@ -112,6 +133,7 @@ export class ReportService {
           timeUsed: true,
           dateUsed: true,
           sport: true,
+          statusReadAdmin: true,
         },
       });
 

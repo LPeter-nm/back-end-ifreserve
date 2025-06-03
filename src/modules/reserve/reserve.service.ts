@@ -84,7 +84,11 @@ export class ReserveService {
               role: true,
             },
           },
-          sport: true,
+          sport: {
+            include: {
+              report: true,
+            },
+          },
           classroom: true,
           event: true,
         },

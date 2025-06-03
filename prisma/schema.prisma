@@ -227,6 +227,7 @@ model Report {
   equipmentCondition String
   timeUsed String
   dateUsed DateTime
+  isSent Boolean @default(false)
   generalComments String?
   commentsAdmin String?
   statusReadAdmin Boolean @default(false)

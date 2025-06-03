@@ -44,14 +44,14 @@ export class ReportController {
     return this.reportService.create(createReportDto, req, reserveId);
   }
 
-  @Get('reports/:userId')
+  @Get('reports-user')
   @ApiResponse({ status: 200, description: 'Relatórios listado com sucesso' })
   @ApiResponse({ status: 400, description: 'Erro ao listar relatórios' })
   @ApiResponse({ status: 500, description: 'Erro interno do servidor' })
   @ApiBearerAuth('access_token')
   @CheckPolicies((ability: AppAbility) => ability.can(Action.User, 'all'))
-  findAllUser(@Param('userId') userId: string) {
-    return this.reportService.findAllUser(userId);
+  findAllUser(@Req() req: Request) {
+    return this.reportService.findAllUser(req);
   }
 
   @Get('reports')
