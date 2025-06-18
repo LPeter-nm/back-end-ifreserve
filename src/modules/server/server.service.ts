@@ -1,5 +1,9 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
-import { CreateServerDto, UpdateServerDto } from './dto/serverDto';
+import {
+  CompleteServerDto,
+  CreateServerDto,
+  UpdateServerDto,
+} from './dto/serverDto';
 import { PrismaService } from 'src/database/PrismaService';
 import { handleAsyncOperation } from 'src/validations/prismaValidate';
 import { randomInt } from 'crypto';
@@ -58,7 +62,7 @@ export class ServerService {
       const randomPass = randomInt(10, 16);
       const hashedPassword = await bcrypt.hash(body.password, randomPass);
 
-      if (!body.email.includes('@acad.ifma.edu.br')) {
+      if (!body.email.includes('@ifma.edu.br')) {
         throw new HttpException(
           'O Email está incorreto',
           HttpStatus.BAD_REQUEST,
@@ -74,6 +78,101 @@ export class ServerService {
           typeUser: 'SERVIDOR',
           server: {
             create: {
+              roleInInstitution: body.roleInInstitution,
+            },
+          },
+        },
+        include: {
+          server: true,
+        },
+      });
+
+      if (
+        registerServer.typeUser == 'SERVIDOR' &&
+        registerServer.server?.roleInInstitution == 'PROFESSOR_EDUCACAO_FISICA'
+      ) {
+        await this.prisma.user.update({
+          where: { id: registerServer.id },
+          data: {
+            role: 'PE_ADMIN',
+          },
+        });
+      }
+
+      return registerServer;
+    });
+  }
+
+  async completeServer(
+    userId: string,
+    body: CompleteServerDto,
+    query: { email: string },
+  ) {
+    if (!body.roleInInstitution) {
+      throw new HttpException(
+        'Digite sua função',
+        HttpStatus.EXPECTATION_FAILED,
+      );
+    }
+
+    const userRegistered = await this.prisma.user.findFirst({
+      where: {
+        identification: body.identification,
+      },
+    });
+
+    if (userRegistered) {
+      throw new HttpException(
+        'Usuário já cadastrado no sistema',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
+    const findUser = await this.prisma.user.findFirst({
+      where: {
+        id: userId,
+      },
+    });
+
+    if (!findUser) {
+      throw new HttpException(
+        'Registro temporário não encontrado',
+        HttpStatus.NOT_FOUND,
+      );
+    }
+
+    if (body.password.length < 8) {
+      throw new HttpException(
+        'É necessário que sua senha tenha pelo menos 8 caracteres',
+        HttpStatus.EXPECTATION_FAILED,
+      );
+    }
+
+    if (body.identification.length < 6 || body.identification.length > 8) {
+      throw new HttpException(
+        'É necessário que sua mátricula tenha entre 6 e 8 caracteres',
+        HttpStatus.EXPECTATION_FAILED,
+      );
+    }
+
+    return handleAsyncOperation(async () => {
+      const randomPass = randomInt(10, 16);
+      const hashedPassword = await bcrypt.hash(body.password, randomPass);
+
+      if (!query.email.includes('@ifma.edu.br')) {
+        throw new HttpException(
+          'O Email está incorreto',
+          HttpStatus.BAD_REQUEST,
+        );
+      }
+
+      const registerServer = await this.prisma.user.update({
+        where: { id: userId },
+        data: {
+          identification: body.identification,
+          password: hashedPassword,
+          server: {
+            update: {
               roleInInstitution: body.roleInInstitution,
             },
           },

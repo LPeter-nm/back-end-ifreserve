@@ -7,13 +7,14 @@ import {
 import { UserService } from '../user/user.service';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcryptjs';
-import { Response } from 'express';
-import {
-  ThrottlerException,
-  ThrottlerGuard,
-  Throttle,
-  ThrottlerModule,
-} from '@nestjs/throttler';
+import { ThrottlerException } from '@nestjs/throttler';
+import { CreateStudentDto } from '../student/dto/studentDto';
+import { CreateServerDto } from '../server/dto/serverDto';
+import { StudentService } from '../student/student.service';
+import { ServerService } from '../server/server.service';
+import { UserExternalService } from '../user-external/user-external.service';
+import { FunctionServer } from '../user/dto/userDto';
+import { CreateUserExternalDto } from '../user-external/dto/userExternalDTO';
 
 @Injectable()
 export class AuthService {
@@ -31,6 +32,9 @@ export class AuthService {
   constructor(
     private readonly usr: UserService,
     private readonly jwt: JwtService,
+    private readonly student: StudentService,
+    private readonly server: ServerService,
+    private readonly external: UserExternalService,
   ) {}
 
   private checkLoginAttempts(ip: string): void {
@@ -125,6 +129,55 @@ export class AuthService {
       }
 
       throw new HttpException(error.message as string, HttpStatus.BAD_REQUEST);
+    }
+  }
+
+  async validateGoogleUser(googleUser: {
+    email: string;
+    name: string;
+    typeUser: string;
+  }) {
+    const user = await this.usr.findOne(googleUser.email);
+    if (!user.error) {
+      return { ...user, isComplete: true };
+    } else if (user.error) {
+      if (googleUser.typeUser === 'Aluno') {
+        const studentData: CreateStudentDto = {
+          email: googleUser.email,
+          name: googleUser.name,
+          identification: '00000EXP.TMN0000',
+          password: '00000000',
+        };
+
+        const user = await this.student.create(studentData);
+
+        return { user, isComplete: false };
+      } else if (googleUser.typeUser === 'Servidor') {
+        const serverData: CreateServerDto = {
+          email: googleUser.email,
+          name: googleUser.name,
+          identification: '123456',
+          password: '00000000',
+          roleInInstitution: 'OUTRO' as FunctionServer,
+        };
+
+        const user = await this.server.create(serverData);
+
+        return { user, isComplete: false };
+      } else {
+        const externalData: CreateUserExternalDto = {
+          email: googleUser.email,
+          name: googleUser.name,
+          phone: '',
+          address: '',
+          password: '00000000',
+          identification: '',
+        };
+
+        const user = await this.external.registerExternal(externalData);
+
+        return { user, isComplete: false };
+      }
     }
   }
 }

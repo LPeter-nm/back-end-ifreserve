@@ -8,9 +8,14 @@ import {
   UseGuards,
   Req,
   Query,
+  Param,
 } from '@nestjs/common';
 import { StudentService } from './student.service';
-import { CreateStudentDto, UpdateStudentDto } from './dto/studentDto';
+import {
+  CompleteStudentDto,
+  CreateStudentDto,
+  UpdateStudentDto,
+} from './dto/studentDto';
 import { ApiBearerAuth, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { PoliciesGuard } from '../casl/guards/policies.guard';
 import { Public } from '../auth/skipAuth/skipAuth';
@@ -44,6 +49,16 @@ export class StudentController {
   })
   create(@Body() body: CreateStudentDto) {
     return this.studentService.create(body);
+  }
+
+  @Public()
+  @Post('complete-register/:id')
+  async completeStudentRegistration(
+    @Param('id') userId: string,
+    @Query() query: { email: string },
+    @Body() body: CompleteStudentDto,
+  ) {
+    return this.studentService.completeStudent(userId, body, query);
   }
 
   @Get('users')

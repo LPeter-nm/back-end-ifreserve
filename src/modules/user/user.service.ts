@@ -35,18 +35,23 @@ export class UserService {
         },
         select: {
           id: true,
+          identification: true,
           email: true,
           password: true,
           role: true,
+          typeUser: true,
         },
       });
 
       if (!usrCheck) {
-        throw new HttpException('Usuário não encontrado', HttpStatus.NOT_FOUND);
+        return {
+          error: true,
+        };
       }
 
       return {
         user: usrCheck,
+        error: false,
       };
     } catch (error) {
       throw new HttpException(error as string, HttpStatus.BAD_REQUEST);

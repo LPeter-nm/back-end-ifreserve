@@ -29,7 +29,7 @@ export class CreateUserExternalDto {
     description: 'CPF do usuário externo',
   })
   @IsNotEmpty()
-  cpf: string;
+  identification: string;
 
   @ApiProperty({
     example: '(00) 00000-0000',
@@ -70,4 +70,35 @@ export class UpdateUserExternalDto {
     description: 'Endereço do usuário externo',
   })
   address?: string;
+}
+
+export class CompleteExternalDto {
+  @ApiProperty({
+    example: '00000000',
+    description: 'Senha do usuário externo',
+  })
+  @Length(8, 24)
+  @IsNotEmpty()
+  password: string;
+
+  @ApiProperty({
+    example: '000.000.000-00',
+    description: 'CPF do usuário externo',
+  })
+  @IsNotEmpty()
+  identification: string;
+
+  @ApiProperty({
+    example: '(00) 00000-0000',
+    description: 'Telefone do usuário externo',
+  })
+  @IsNotEmpty()
+  phone: string;
+
+  @ApiProperty({
+    example: 'Rua 0; bairro 0; n. 0000',
+    description: 'Endereço do usuário externo',
+  })
+  @IsNotEmpty()
+  address: string;
 }

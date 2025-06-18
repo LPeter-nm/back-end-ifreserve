@@ -47,3 +47,21 @@ export class UpdateStudentDto {
   @Length(8, 24)
   password?: string;
 }
+
+export class CompleteStudentDto {
+  @ApiProperty({
+    example: '00000EXP.TMN0000',
+    description: 'Matrícula do aluno',
+  })
+  @Length(16, 16)
+  @IsNotEmpty()
+  identification: string;
+
+  @ApiProperty({
+    example: '00000000',
+    description: 'Senha do aluno',
+  })
+  @Length(8, 24)
+  @IsNotEmpty()
+  password: string;
+}

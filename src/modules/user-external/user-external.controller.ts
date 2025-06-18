@@ -8,9 +8,11 @@ import {
   Req,
   Put,
   Query,
+  Param,
 } from '@nestjs/common';
 import { UserExternalService } from './user-external.service';
 import {
+  CompleteExternalDto,
   CreateUserExternalDto,
   UpdateUserExternalDto,
 } from './dto/userExternalDTO';
@@ -44,6 +46,16 @@ export class UserExternalController {
   @ApiResponse({ status: 500, description: 'Erro interno do servidor' })
   create(@Body() body: CreateUserExternalDto) {
     return this.userExternalService.registerExternal(body);
+  }
+
+  @Public()
+  @Post('complete-register/:id')
+  completeExternal(
+    @Param('id') userId: string,
+    @Query() query: { email: string },
+    @Body() body: CompleteExternalDto,
+  ) {
+    return this.userExternalService.completeExternal(userId, body, query);
   }
 
   @Get('users')

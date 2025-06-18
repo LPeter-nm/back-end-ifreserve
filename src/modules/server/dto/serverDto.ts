@@ -61,3 +61,28 @@ export class UpdateServerDto {
   @Length(8, 24)
   password?: string;
 }
+
+export class CompleteServerDto {
+  @ApiProperty({
+    example: '153810',
+    description: 'Matrícula do servidor',
+  })
+  @Length(6, 8)
+  @IsNotEmpty()
+  identification: string;
+
+  @ApiProperty({
+    example: 'Professor de educação física',
+    description: 'Função do servidor no Instituto',
+  })
+  @IsNotEmpty()
+  roleInInstitution: FunctionServer;
+
+  @ApiProperty({
+    example: '00000000',
+    description: 'Senha do servidor',
+  })
+  @Length(8, 24)
+  @IsNotEmpty()
+  password: string;
+}

@@ -8,9 +8,14 @@ import {
   Req,
   UseGuards,
   Query,
+  Param,
 } from '@nestjs/common';
 import { ServerService } from './server.service';
-import { CreateServerDto, UpdateServerDto } from './dto/serverDto';
+import {
+  CompleteServerDto,
+  CreateServerDto,
+  UpdateServerDto,
+} from './dto/serverDto';
 import { Request } from 'express';
 import { PoliciesGuard } from '../casl/guards/policies.guard';
 import { ApiBearerAuth, ApiResponse, ApiTags } from '@nestjs/swagger';
@@ -42,8 +47,18 @@ export class ServerController {
     status: 500,
     description: 'Erro interno do servidor',
   })
-  register(@Body() body: CreateServerDto) {
+  create(@Body() body: CreateServerDto) {
     return this.serverService.create(body);
+  }
+
+  @Public()
+  @Post('/complete-register/:id')
+  completeServer(
+    @Param('id') userId: string,
+    @Body() body: CompleteServerDto,
+    @Query() query: { email: string },
+  ) {
+    return this.serverService.completeServer(userId, body, query);
   }
 
   @Get('users')

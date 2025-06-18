@@ -1,5 +1,6 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import {
+  CompleteExternalDto,
   CreateUserExternalDto,
   UpdateUserExternalDto,
 } from './dto/userExternalDTO';
@@ -16,10 +17,10 @@ export class UserExternalService {
   constructor(private readonly prisma: PrismaService) {}
 
   async registerExternal(body: CreateUserExternalDto) {
-    const cpfRegistered = await this.prisma.user.findUnique({
-      where: { identification: body.cpf },
+    const identificationRegistered = await this.prisma.user.findUnique({
+      where: { identification: body.identification },
     });
-    if (cpfRegistered)
+    if (identificationRegistered)
       throw new HttpException(
         'CPF já cadastrado no sistema',
         HttpStatus.CONFLICT,
@@ -46,11 +47,88 @@ export class UserExternalService {
         data: {
           name: body.name,
           email: body.email,
-          identification: body.cpf,
+          identification: body.identification,
           password: hashedPassword,
           typeUser: 'EXTERNO',
           userExternal: {
             create: {
+              phone: body.phone,
+              address: body.address,
+            },
+          },
+        },
+        select: {
+          id: true,
+          name: true,
+          identification: true,
+          email: true,
+          password: true,
+          status: true,
+          userExternal: {
+            select: {
+              phone: true,
+              address: true,
+            },
+          },
+          createdAt: true,
+        },
+      });
+
+      return registerExternal;
+    });
+  }
+
+  async completeExternal(
+    userId: string,
+    body: CompleteExternalDto,
+    query: { email: string },
+  ) {
+    const identificationRegistered = await this.prisma.user.findUnique({
+      where: { identification: body.identification },
+    });
+    if (identificationRegistered)
+      throw new HttpException(
+        'CPF já cadastrado no sistema',
+        HttpStatus.CONFLICT,
+      );
+
+    const findUser = await this.prisma.user.findFirst({
+      where: {
+        id: userId,
+      },
+    });
+
+    if (!findUser) {
+      throw new HttpException(
+        'Registro temporário não encontrado',
+        HttpStatus.NOT_FOUND,
+      );
+    }
+
+    if (body.password.length < 8) {
+      throw new HttpException(
+        'É necessário que a senha tenha pelo menos 8 caracteres',
+        HttpStatus.EXPECTATION_FAILED,
+      );
+    }
+
+    return handleAsyncOperation(async () => {
+      const randomPass = randomInt(10, 16);
+      const hashedPassword = await bcrypt.hash(body.password, randomPass);
+
+      if (!query.email.includes('@'))
+        throw new HttpException(
+          'O Email está incorreto',
+          HttpStatus.BAD_REQUEST,
+        );
+
+      const registerExternal = await this.prisma.user.update({
+        where: { id: userId },
+        data: {
+          identification: body.identification,
+          password: hashedPassword,
+          userExternal: {
+            update: {
               phone: body.phone,
               address: body.address,
             },

@@ -8,11 +8,18 @@ import { JwtModule } from '@nestjs/jwt';
 import { CaslModule } from '../casl/casl.module';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { APP_GUARD } from '@nestjs/core';
+import { ConfigModule } from '@nestjs/config';
+import googleOauthConfig from './config/google-oauth.config';
+import { GoogleStrategy } from './strategies/google.strategy';
+import { UserExternalService } from '../user-external/user-external.service';
+import { StudentService } from '../student/student.service';
+import { ServerService } from '../server/server.service';
 
 @Module({
   imports: [
     UserModule,
     CaslModule,
+    ConfigModule.forFeature(googleOauthConfig),
     JwtModule.register({
       global: true,
       secret: process.env.JWT_SECRET,
@@ -24,9 +31,13 @@ import { APP_GUARD } from '@nestjs/core';
   ],
   controllers: [AuthController],
   providers: [
+    GoogleStrategy,
     AuthService,
     UserService,
     PrismaService,
+    UserExternalService,
+    StudentService,
+    ServerService,
     { provide: APP_GUARD, useClass: ThrottlerGuard },
   ],
 })
