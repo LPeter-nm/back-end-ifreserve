@@ -46,6 +46,7 @@ export class AuthController {
   async googleCallback(@Req() req: Request, @Res() res: Response) {
     try {
       const googleUser = req.user as any;
+  
 
       const existingUser = await this.usr.findOne(googleUser.user.email);
       if (existingUser) {
@@ -66,15 +67,15 @@ export class AuthController {
 
       if (existingUser.user?.typeUser === 'ALUNO') {
         return res.redirect(
-          `http://localhost:3000/complete-student?userId=${existingUser.user.id}&email=${googleUser.user.email}&name=${googleUser.user.name}`,
+          `http://localhost:3000/complete-student?userId=${existingUser.user.id}&email=${googleUser.user.email}&name=${existingUser.user.name}`,
         );
       } else if (existingUser.user?.typeUser === 'SERVIDOR') {
         return res.redirect(
-          `http://localhost:3000/complete-server?userId=${existingUser.user.id}&email=${googleUser.user.email}&name=${googleUser.user.name}`,
+          `http://localhost:3000/complete-server?userId=${existingUser.user.id}&email=${googleUser.user.email}&name=${existingUser.user.name}`,
         );
       } else {
         return res.redirect(
-          `http://localhost:3000/complete-external?userId=${existingUser.user?.id}&email=${googleUser.user.email}&name=${googleUser.user.name}`,
+          `http://localhost:3000/complete-external?userId=${existingUser.user?.id}&email=${googleUser.user.email}&name=${existingUser.user?.name}`,
         );
       }
     } catch (error) {
@@ -90,10 +91,10 @@ export class AuthController {
 
     switch (typeUser) {
       case 'ALUNO':
-        return /^\d{4}[12]EXP.TMN\d{4}$/.test(identification);
+        return identification === '00000EXP.TMN0000'
 
       case 'SERVIDOR':
-        return /^\d{6}$/.test(identification);
+        return identification === '123456'
 
       case 'EXTERNO':
         return identification === '';
